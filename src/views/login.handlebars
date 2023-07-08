@@ -1,0 +1,38 @@
+<div class="container">
+	<div class="row mt-5">
+		<div class="d-flex justify-content-center">
+			<h1>Log in</h1>
+		</div>
+	</div>
+
+	<div class="row mt-3 justify-content-center">
+		<div class="col-sm-10 col-md-8 col-lg-6 d-flex justify-content-center">
+			<form class="col-10">
+				<div class="form-row">
+					<div class="alert alert-light mb-3" role="alert">
+						<a href="/api/session/github">Log in with your Github account</a>
+					</div>
+					<div class="alert alert-info mb-3" role="alert">
+						Don't have an account? <a href="/register">Register</a>
+					</div>
+					<div class="form-group mb-2">
+						<input type="email" class="form-control" id="inputEmail" placeholder="Email">
+					</div>
+					<div class="form-group mb-2">
+						<input type="password" class="form-control" id="inputPassword" placeholder="Password">
+					</div>
+				</div>
+				<button class="btn btn-primary mt-3" id="login-button">Log in</button>
+				{{#if message}}
+				<div class="alert alert-danger mt-4" id="login-failed" role="alert">{{message}}</div>
+				{{/if}}
+				<div class="alert alert-danger mt-4" id="login-error" role="alert" hidden></div>
+			</form>
+		</div>
+	</div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+<script src="session.js"></script>

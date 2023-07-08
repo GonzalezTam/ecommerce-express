@@ -1,0 +1,75 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01" aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-between" id="navbarTogglerDemo01">
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <a class="navbar-brand" href="#">🕹</a>
+      <li class="nav-item active">
+        <a class="nav-link" href="/products"><b>Products</b></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/profile">Profile</a>
+      </li>
+      {{!--<li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>--}}
+      <li class="nav-item">
+        <a class="nav-link disabled" id="my-cart" href="#">🛒 (0)</a>
+      </li>
+      <span class="navbar-text gap-5" style="color: #adadad">
+        Welcome {{user.firstName}} {{user.lastName}}. Your account type is: {{user.role}}.
+      </span>
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <button class="btn btn-sm btn-danger my-2 my-sm-0" id="logout-button">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="row mt-5"><h1>Products</h1></div>
+  {{#if user}}
+    <div class="alert alert-info mb-4" id="userWelcomeAlert" role="alert" hidden>
+      Welcome {{user.firstName}}, you are logged in!
+    </div>
+  {{/if}}
+  <div class="row mt-3">
+    {{#if products.payload.length}}
+      {{#each products.payload}}
+        <div class="card m-2 p-0" style="width: 17rem;">
+          <img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
+          <div class="card-body">
+            <h5 class="card-title">{{this.title}}</h5>
+            <p class="card-text">{{this.description}}</p>
+          </div>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">Price: ${{this.price}}</li>
+            <li class="list-group-item">Stock: {{this.stock}}</li>
+            <li class="list-group-item">Code: {{this.code}}</li>
+            <li class="list-group-item">ID: {{this._id}}</li>
+          </ul>
+          <ul class="card-footer m-0 row">
+            <button class="justify-content-center m-0 btn btn-secondary btn-sm add-to-cart" data-id={{this._id}}>Add to 🛒</button>
+          </ul>
+        </div>
+      {{/each}}
+
+    <div>
+        {{#if products.hasPrevPage}}
+            <a href="{{products.prevLink}}">Previous</a>
+        {{/if}}
+        {{#if products.hasNextPage}}
+            <a href="{{products.nextLink}}">Next</a>
+        {{/if}}
+    </div>
+
+    {{else}}
+      <p class="m-1">No products available</p>
+    {{/if}}
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+<script src="session.js"></script>
