@@ -3,7 +3,9 @@ const GitHubStrategy = require('passport-github2');
 const local = require('passport-local');
 const userModel = require('./dao/models/user.model.js');
 const { createHash, isValidPassword } = require('./utils.js');
+const dotEnvConfig = require('./config/env.config.js');
 
+const { PORT } = dotEnvConfig;
 const LocalStrategy = local.Strategy
 
 const initializePassport = () => {
@@ -43,7 +45,7 @@ const initializePassport = () => {
   passport.use('github', new GitHubStrategy({
     clientID: 'Iv1.553a92955263bb5f',
     clientSecret: '9c8e5eef2c44061d8929d51742364bb487869e21',
-    callbackURL: "http://localhost:8080/api/session/githubcallback",
+    callbackURL: `http://localhost:${PORT}/api/session/githubcallback`,
     scope: ['user:email']
   },
     async (accessToken, refreshToken, profile, done) => {

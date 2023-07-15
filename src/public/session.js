@@ -1,3 +1,5 @@
+import { PORT } from './config.js'
+
 const signUpButton = document.getElementById('signup-button');
 const loginButton = document.getElementById('login-button');
 const logoutButton = document.getElementById('logout-button');
@@ -42,7 +44,7 @@ async function register() {
 	}
 
 	try {
-		const response = await fetch('http://localhost:8080/api/session/register', {
+		const response = await fetch(`http://localhost:${PORT}/api/session/register`, {
 			method: 'post',
 			body: JSON.stringify(body),
 			headers: { 'Content-Type': 'application/json' },
@@ -73,7 +75,7 @@ async function login() {
 		password
 	}
 	try {
-		const response = await fetch('http://localhost:8080/api/session/login', {
+		const response = await fetch(`http://localhost:${PORT}/api/session/login`, {
 			method: 'post',
 			body: JSON.stringify(body),
 			headers: { 'Content-Type': 'application/json' },
@@ -96,7 +98,7 @@ async function login() {
 
 async function logout() {
 	try {
-		const response = await fetch('http://localhost:8080/api/session/logout', {
+		const response = await fetch(`http://localhost:${PORT}/api/session/logout`, {
 			method: 'get',
 			headers: { 'Content-Type': 'application/json' },
 		});

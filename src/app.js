@@ -6,6 +6,7 @@ const MongoStore = require('connect-mongo');
 
 const passport = require('passport');
 const initializePassport = require('./passport.config.js');
+const dotEnvConfig = require('./config/env.config.js');
 
 const handlebars = require('express-handlebars');
 const { Server } = require('socket.io');
@@ -15,11 +16,13 @@ const productsRouter = require('./routes/products.router');
 const cartsRouter = require('./routes/carts.router');
 const sessionRouter = require('./routes/session.router.js');
 
+const { PORT, SOCKET_PORT, MONGO_URI } = dotEnvConfig;
+
 const app = express();
 
 try {
-  connectDB();
-  const httpServer = app.listen(8080, () => console.log('Server is running on port 8080'));
+  connectDB(MONGO_URI);
+  const httpServer = app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
   app.use(express.json());
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -37,7 +40,7 @@ try {
     secret: 'jamesbond',
     resave: true,
     saveUninitialized: true
-}))
+  }))
 
   initializePassport();
   app.use(passport.initialize());
@@ -52,7 +55,7 @@ try {
   app.use('/api/session', sessionRouter);
   app.use('/', viewsRouter)
 
-  const socketServer = new Server(httpServer, { port: 8081 });
+  const socketServer = new Server(httpServer, { port: SOCKET_PORT });
 
   socketServer.on('connection', (socketClient) => {
     socketClient.on('productSubmit', (data) => {
@@ -73,5 +76,6 @@ try {
     })
   })
 } catch (error) {
+  //console.log(error)
   console.log("Server Error")
 }

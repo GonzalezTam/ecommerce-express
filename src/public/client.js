@@ -1,8 +1,10 @@
+import { PORT } from './config.js'
+
 let productsArray = [];
 let userCart;
-let reqUserSession;
+
 document.onreadystatechange = async () => {
-	await fetch(`http://localhost:8080/api/products?limit=all`)
+	await fetch(`http://localhost:${PORT}/api/products?limit=all`)
 		.then(res => res.json())
 		.then(data => {
 			productsArray = data.products.payload;
@@ -92,7 +94,7 @@ socket.on('delete_product', data => {
 async function delete_product(id) {
 	//console.log('removeProduct', id);
 	try {
-		const response = await fetch(`http://localhost:8080/api/products/${id}`, {
+		const response = await fetch(`http://localhost:${PORT}/api/products/${id}`, {
 			method: 'delete',
 		});
 		if (response.status === 200) {
@@ -140,7 +142,7 @@ async function create_cart(id) {
 				}
 			]
 		}
-		const response = await fetch('http://localhost:8080/api/carts', {
+		const response = await fetch('http://localhost:${PORT}/api/carts', {
 			method: 'post',
 			body: JSON.stringify(body),
 			headers: { 'Content-Type': 'application/json' },
@@ -166,12 +168,12 @@ async function update_cart(id) {
 	let cartId = userCart._id;
 	let productId = id;
 	try {
-		const response = await fetch(`http://localhost:8080/api/carts/${cartId}/products/${productId}`, {
+		const response = await fetch(`http://localhost:${PORT}/api/carts/${cartId}/products/${productId}`, {
 			method: 'post',
 			headers: { 'Content-Type': 'application/json' },
 		});
 		if (response.status === 200) {
-			const fetchUpdatedCart = await fetch(`http://localhost:8080/api/carts/${cartId}`);
+			const fetchUpdatedCart = await fetch(`http://localhost:${PORT}/api/carts/${cartId}`);
 			const dataUpdatedCart = await fetchUpdatedCart.json();
 			socket = io();
 			socket.emit('cartUpdated', dataUpdatedCart.cart)
@@ -198,7 +200,7 @@ submit?.addEventListener('click', async (e) => {
 			stock: parseInt(stock.value),
 			code: code.value,
 		}
-		const response = await fetch('http://localhost:8080/api/products', {
+		const response = await fetch(`http://localhost:${PORT}/api/products`, {
 			method: 'post',
 			body: JSON.stringify(body),
 			headers: { 'Content-Type': 'application/json' },

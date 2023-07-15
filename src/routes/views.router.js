@@ -1,6 +1,9 @@
 const express = require('express')
-const productModel = require('./../dao/models/product.model');
 const router = express.Router()
+const productModel = require('./../dao/models/product.model');
+const dotEnvConfig = require('../config/env.config.js')
+
+const { PORT } = dotEnvConfig;
 
 // if user is not logged in, redirect to login page.
 const auth = (req, res, next) => {
@@ -54,7 +57,7 @@ router.get('/products', auth, async (req, res) => {
 	let page = +req.query.page;
 	if (!page) page = 1
 	let result;
-	await fetch(`http://localhost:8080/api/products?page=${page}`)
+	await fetch(`http://localhost:${PORT}/api/products?page=${page}`)
 		.then(res => res.json())
 		.then(data => {
 			result = data;
@@ -66,7 +69,7 @@ router.get('/products', auth, async (req, res) => {
 router.get('/carts/:cid', auth, async (req, res) => {
 	let cid = req.params.cid;
 	let result;
-	await fetch(`http://localhost:8080/api/carts/${cid}`)
+	await fetch(`http://localhost:${PORT}/api/carts/${cid}`)
 		.then(res => res.json())
 		.then(data => {
 			result = data.cart;
