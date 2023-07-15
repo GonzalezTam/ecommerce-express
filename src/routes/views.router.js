@@ -7,7 +7,10 @@ const { PORT } = dotEnvConfig;
 
 // if user is not logged in, redirect to login page.
 const auth = (req, res, next) => {
-	if (req.session.user) return next();
+	if (req.session.user) {
+		if (req.path === '/productsmanager' && req.session.user.role === 'user') return res.redirect('/products')
+		else return next();
+	}
 	const path = req.path;
 	const failed = req.query.failed || true;
 	if (path === '/' && !req.query.failed) return res.redirect('/login');
@@ -40,18 +43,6 @@ router.get('/profile', auth, (req, res) => {
 	res.render('profile', {user: req.session.user})
 })
 
-router.get('/realtimeproducts', auth, async (req, res) => {
-	let products = await productModel.find().lean().exec();
-	const limit = req.query.limit;
-
-	if (limit) {
-		let productsLimit = products.slice(0, limit);
-    res.render('realtimeproducts', {products: productsLimit})
-	} else {
-    res.render('realtimeproducts', {products: products})
-	}
-})
-
 router.get('/products', auth, async (req, res) => {
 	const user = req.session?.user;
 	let page = +req.query.page;
@@ -64,6 +55,21 @@ router.get('/products', auth, async (req, res) => {
 		})
 		.catch(err => console.log(err))
   return res.render('products', {user: user, products: result.products})
+})
+
+// This route is for admin user only
+router.get('/productsmanager', auth, async (req, res) => {
+	const user = req.session?.user;
+	let page = +req.query.page;
+	if (!page) page = 1
+	let result;
+	await fetch(`http://localhost:${PORT}/api/products/manager?page=${page}`)
+		.then(res => res.json())
+		.then(data => {
+			result = data;
+		})
+		.catch(err => console.log(err))
+  return res.render('productsmanager', {user: user, products: result.products})
 })
 
 router.get('/carts/:cid', auth, async (req, res) => {

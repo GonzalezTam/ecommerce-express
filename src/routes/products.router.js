@@ -1,4 +1,4 @@
-const { Router, response } = require('express');
+const { Router } = require('express');
 const productModel = require('./../dao/models/product.model');
 
 const router = Router();
@@ -66,6 +66,80 @@ router.get('/', async (req, res) => {
 		res.status(400).send({ products: resObj })
 	}
 });
+
+router.get('/manager/', async (req, res) => {
+	try {
+		const limit = req.query.limit;
+		const page = req.query.page;
+		const sort = req.query.sort;
+
+		// query params for category and status
+		const category = req.query.category || null;
+		const status = req.query.status || null;
+		const query = {
+			...(category && { category }),
+			...(status && { status })
+		}
+
+		// if limit is 'all', all products will be returned, no pagination
+		if (limit === 'all') {
+			const products = await productModel.find(query).lean().exec();
+			const resObj = {
+				status: 'success',
+				payload: products,
+				count: products.length
+			}
+			return res.send({ products: resObj });
+		}
+
+		// if there is no category or status, the query will be empty and all products will be returned
+		const products = await productModel.paginate(query, { page: page || 1, limit: limit || 10, sort: sort ? { price: sort } : {} });
+
+		const loopedPages = [];
+		for (let i = 0; i < products.totalPages; i++) {
+			loopedPages.push({
+				page: i + 1,
+				active: i === products.page - 1
+			})
+		}
+
+		const resObj = {
+			status: 'success',
+			payload: products.docs,
+			totalPages: products.totalPages,
+			prevPage: products.prevPage || null,
+			nextPage: products.nextPage || null,
+			page: products.page || null,
+			hasPrevPage: products.hasPrevPage,
+			hasNextPage: products.hasNextPage,
+			prevLink: products.hasPrevPage ? `/productsmanager?page=${products.prevPage}` : null,
+			nextLink: products.hasNextPage ? `/productsmanager?page=${products.nextPage}` : null,
+			count: products.docs.length,
+			totalCount: products.totalDocs,
+			loopedPages: loopedPages
+		}
+
+		res.send({ products: resObj });
+	} catch {
+		const resObj = {
+			status: 'error',
+			message: 'There was an error while querying the database',
+			payload: [],
+			totalPages: 0,
+			prevPage: null,
+			nextPage: null,
+			page: null,
+			hasPrevPage: false,
+			hasNextPage: false,
+			prevLink: null,
+			nextLink: null,
+			count: null,
+			totalCount: null
+		}
+		res.status(400).send({ products: resObj })
+	}
+});
+
 
 router.get('/:id', async (req, res) => {
 	const id = req.params.id;

@@ -1,10 +1,10 @@
-import { PORT } from './config.js'
-
 let productsArray = [];
 let userCart;
 
+
 document.onreadystatechange = async () => {
-	await fetch(`http://localhost:${PORT}/api/products?limit=all`)
+	const products = (location.pathname === '/productsmanager') ? '/products/manager' : '/products';
+	await fetch(`http://localhost:3000/api${products}?limit=all`)
 		.then(res => res.json())
 		.then(data => {
 			productsArray = data.products.payload;
@@ -94,7 +94,7 @@ socket.on('delete_product', data => {
 async function delete_product(id) {
 	//console.log('removeProduct', id);
 	try {
-		const response = await fetch(`http://localhost:${PORT}/api/products/${id}`, {
+		const response = await fetch(`http://localhost:3000/api/products/${id}`, {
 			method: 'delete',
 		});
 		if (response.status === 200) {
@@ -142,7 +142,7 @@ async function create_cart(id) {
 				}
 			]
 		}
-		const response = await fetch('http://localhost:${PORT}/api/carts', {
+		const response = await fetch(`http://localhost:3000/api/carts`, {
 			method: 'post',
 			body: JSON.stringify(body),
 			headers: { 'Content-Type': 'application/json' },
@@ -168,7 +168,7 @@ async function update_cart(id) {
 	let cartId = userCart._id;
 	let productId = id;
 	try {
-		const response = await fetch(`http://localhost:${PORT}/api/carts/${cartId}/products/${productId}`, {
+		const response = await fetch(`http://localhost:3000/api/carts/${cartId}/products/${productId}`, {
 			method: 'post',
 			headers: { 'Content-Type': 'application/json' },
 		});
@@ -200,7 +200,7 @@ submit?.addEventListener('click', async (e) => {
 			stock: parseInt(stock.value),
 			code: code.value,
 		}
-		const response = await fetch(`http://localhost:${PORT}/api/products`, {
+		const response = await fetch(`http://localhost:3000/api/products`, {
 			method: 'post',
 			body: JSON.stringify(body),
 			headers: { 'Content-Type': 'application/json' },
