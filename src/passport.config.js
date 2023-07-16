@@ -5,7 +5,7 @@ const userModel = require('./dao/models/user.model.js');
 const { createHash, isValidPassword } = require('./utils.js');
 const dotEnvConfig = require('./config/env.config.js');
 
-const { PORT } = dotEnvConfig;
+const { GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = dotEnvConfig;
 const LocalStrategy = local.Strategy
 
 const initializePassport = () => {
@@ -43,9 +43,9 @@ const initializePassport = () => {
   }))
 
   passport.use('github', new GitHubStrategy({
-    clientID: 'Iv1.553a92955263bb5f',
-    clientSecret: '9c8e5eef2c44061d8929d51742364bb487869e21',
-    callbackURL: `http://localhost:${PORT}/api/session/githubcallback`,
+    clientID: GITHUB_CLIENT_ID,
+    clientSecret: GITHUB_CLIENT_SECRET,
+    callbackURL: GITHUB_CALLBACK_URL,
     scope: ['user:email']
   },
     async (accessToken, refreshToken, profile, done) => {

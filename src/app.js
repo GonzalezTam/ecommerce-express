@@ -16,7 +16,7 @@ const productsRouter = require('./routes/products.router');
 const cartsRouter = require('./routes/carts.router');
 const sessionRouter = require('./routes/session.router.js');
 
-const { PORT, SOCKET_PORT, MONGO_URI } = dotEnvConfig;
+const { PORT, SOCKET_PORT, MONGO_URI, MONGO_DB_SESSION, SECRET } = dotEnvConfig;
 
 const app = express();
 
@@ -25,19 +25,20 @@ try {
   const httpServer = app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 
   app.use(express.json());
+  app.use(express.static('./src/public'))
   app.use(bodyParser.urlencoded({ extended: true }));
   app.use(bodyParser.json())
 
   app.use(session({
     store: MongoStore.create({
-      mongoUrl: 'mongodb+srv://coder:coder@backend39755.igyxgug.mongodb.net/',
-      dbName: 'ecommerce-sessions',
+      mongoUrl: MONGO_URI,
+      dbName: MONGO_DB_SESSION,
       mongoOptions: {
         useNewUrlParser: true,
         useUnifiedTopology: true
       }
     }),
-    secret: 'jamesbond',
+    secret: SECRET,
     resave: true,
     saveUninitialized: true
   }))
@@ -49,7 +50,7 @@ try {
   app.engine('handlebars', handlebars.engine())
   app.set('views', './src/views')
   app.set('view engine', 'handlebars')
-  app.use(express.static('./src/public'))
+
   app.use('/api/products', productsRouter);
   app.use('/api/carts', cartsRouter);
   app.use('/api/session', sessionRouter);
