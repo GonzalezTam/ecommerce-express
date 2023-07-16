@@ -31,6 +31,14 @@ router.get('/', async (req, res) => {
 		// if there is no category or status, the query will be empty and all products will be returned
 		const products = await productModel.paginate(query, { page: page || 1, limit: limit || 10, sort: sort ? { price: sort } : {} });
 
+		const loopedPages = [];
+		for (let i = 0; i < products.totalPages; i++) {
+			loopedPages.push({
+				page: i + 1,
+				active: i === products.page - 1
+			})
+		}
+
 		const resObj = {
 			status: 'success',
 			payload: products.docs,
@@ -43,7 +51,8 @@ router.get('/', async (req, res) => {
 			prevLink: products.hasPrevPage ? `/products?page=${products.prevPage}` : null,
 			nextLink: products.hasNextPage ? `/products?page=${products.nextPage}` : null,
 			count: products.docs.length,
-			totalCount: products.totalDocs
+			totalCount: products.totalDocs,
+			loopedPages: loopedPages
 		}
 
 		res.send({ products: resObj });

@@ -6,8 +6,8 @@
   <div class="collapse navbar-collapse justify-content-between" id="navbarTogglerDemo01">
     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
       <a class="navbar-brand" href="#">🕹</a>
-      <li class="nav-item active">
-        <a class="nav-link" href="/products"><b>Products</b></a>
+      <li class="nav-item">
+        <a class="nav-link" href="/products">Products</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/profile">Profile</a>
@@ -15,14 +15,18 @@
       {{!--<li class="nav-item">
         <a class="nav-link disabled" href="#">Disabled</a>
       </li>--}}
+      <!-- Admin does not have access to cart -->
+      {{#unless isAdmin}}
       <li class="nav-item">
         <a class="nav-link disabled" id="my-cart" href="#">🛒 (0)</a>
       </li>
-      <span class="navbar-text gap-5" style="color: #adadad">
-        Welcome {{user.firstName}} {{user.lastName}}. Your account type is: {{user.role}}.
-      </span>
+      {{/unless}}
     </ul>
     <form class="form-inline my-2 my-lg-0">
+      <!-- Admin has access to admin panel -->
+      {{#if isAdmin}}
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="adminPanel-button">⚙</button>
+      {{/if}}
       <button class="btn btn-sm btn-danger my-2 my-sm-0" id="logout-button">Logout</button>
     </form>
   </div>
@@ -101,6 +105,7 @@
       </td>
     </tr>
     {{/each}}
+    <!-- If no products -->
     {{else}}
     <tr>
       <td colspan="8" class="text-center">No products found</td>
@@ -108,6 +113,7 @@
     {{/if}}
   </table>
 
+  {{!-- Pagination --}}
   <nav aria-label="Products pagination">
     <ul class="pagination">
       {{#if products.hasPrevPage}}
@@ -128,33 +134,6 @@
     </ul>
   </nav>
 
-  {{!--<div id="products-div" class="row mt-3 mb-5">
-    {{#if products.length}}
-    {{#each products}}
-    <div class="card m-2 p-0" style="width: 17rem;">
-      <img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
-      <div class="card-body">
-        <h5 class="card-title">{{this.title}}</h5>
-        <p class="card-text">{{this.description}}</p>
-      </div>
-      <ul class="list-group list-group-flush">
-        <li class="list-group-item">Price: ${{this.price}}</li>
-        <li class="list-group-item">Stock: {{this.stock}}</li>
-        <li class="list-group-item">Code: {{this.code}}</li>
-        <li class="list-group-item">ID: {{this._id}}</li>
-      </ul>
-      <div class="card-footer text-right">
-        <li class="list-group-item text-end"><button data-id={{this._id}} type="button"
-            class="remove-product btn btn-danger btn-sm">Remove</button></li>
-      </div>
-    </div>
-    {{/each}}
-    {{else}}
-    <p class="m-1">No products available.</p>
-    {{/if}}
-  </div>
-</div>--}}
-
-<script src="/socket.io/socket.io.js"></script>
-<script src="client.js"></script>
-<script src="session.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+  <script src="session.js"></script>

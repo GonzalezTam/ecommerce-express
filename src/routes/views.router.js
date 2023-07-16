@@ -40,11 +40,13 @@ router.get('/login', activeSession, (req, res) => {
 });
 
 router.get('/profile', auth, (req, res) => {
-	res.render('profile', {user: req.session.user})
+	const isAdmin = req.session.user?.role === 'admin' ? true : false;
+	res.render('profile', {user: req.session.user, isAdmin: isAdmin})
 })
 
 router.get('/products', auth, async (req, res) => {
 	const user = req.session?.user;
+	const isAdmin = req.session.user?.role === 'admin' ? true : false;
 	let page = +req.query.page;
 	if (!page) page = 1
 	let result;
@@ -54,12 +56,13 @@ router.get('/products', auth, async (req, res) => {
 			result = data;
 		})
 		.catch(err => console.log(err))
-  return res.render('products', {user: user, products: result.products})
+  return res.render('products', {user: user, isAdmin: isAdmin, products: result.products})
 })
 
 // This route is for admin user only
 router.get('/productsmanager', auth, async (req, res) => {
 	const user = req.session?.user;
+	const isAdmin = req.session.user?.role === 'admin' ? true : false;
 	let page = +req.query.page;
 	if (!page) page = 1
 	let result;
@@ -69,7 +72,7 @@ router.get('/productsmanager', auth, async (req, res) => {
 			result = data;
 		})
 		.catch(err => console.log(err))
-  return res.render('productsmanager', {user: user, products: result.products})
+  return res.render('productsmanager', {user: user, isAdmin: isAdmin, products: result.products})
 })
 
 router.get('/carts/:cid', auth, async (req, res) => {

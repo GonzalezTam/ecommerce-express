@@ -1,21 +1,20 @@
 let productsArray = [];
 let userCart;
 
-
 document.onreadystatechange = async () => {
 	const products = (location.pathname === '/productsmanager') ? '/products/manager' : '/products';
 	await fetch(`http://localhost:3000/api${products}?limit=all`)
-		.then(res => res.json())
-		.then(data => {
+	.then(res => res.json())
+	.then(data => {
 			productsArray = data.products.payload;
 		})
 		.catch(err => console.log(err))
-}
+	}
 
 let socket
 let submit = document.getElementById('submit')
 let removeProduct = document.getElementsByClassName('remove-product')
-let addToCart = document.getElementsByClassName('add-to-cart')
+let editProduct = document.getElementsByClassName('edit-product')
 let cart = document.getElementById('my-cart')
 let title = document.getElementById('title');
 let category = document.getElementById('category');
@@ -23,96 +22,77 @@ let description = document.getElementById('description');
 let price = document.getElementById('price');
 let stock = document.getElementById('stock');
 let code = document.getElementById('code');
-let gallery = document.getElementById('products-div')
+let adminPanelButton = document.getElementById('adminPanel-button');
 
 document.addEventListener('click', function (e) {
-  if (e.target.matches('.remove-product')) delete_product(e.target.dataset.id);
+	if (e.target.matches('.remove-product')) delete_product(e.target.dataset.id);
+	if (e.target.matches('.edit-product')) edit_product(e.target.dataset.id);
 	if (userCart && userCart._id) {
 		if (e.target.matches('.add-to-cart')) update_cart(e.target.dataset.id);
 	} else {
 		if (e.target.matches('.add-to-cart')) create_cart(e.target.dataset.id);
 	}
+	if (e.target.matches('#adminPanel-button')) {
+		e.preventDefault();
+		document.location.href = '/productsmanager';
+	}
 }, false);
-
-socket = io();
-socket.on('new_product', data => {
-	productsArray[data._id] = data;
-	let productsCards = '';
-	Object.values(productsArray).forEach(p => {
-		productsCards += `
-			<div class="card m-2 p-0" style="width: 17rem;">
-				<img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
-				<div class="card-body">
-					<h5 class="card-title">${p.title}</h5>
-					<p class="card-text">${p.description}</p>
-				</div>
-				<ul class="list-group list-group-flush">
-					<li class="list-group-item">Price: $${p.price}</li>
-					<li class="list-group-item">Stock: ${p.stock}</li>
-					<li class="list-group-item">Code: ${p.code}</li>
-					<li class="list-group-item">ID: ${p._id}</li>
-				</ul>
-				<div class="card-footer text-right">
-					<li class="list-group-item text-end"><button data-id="${p._id}" type="button" class="remove-product btn btn-danger btn-sm">Remove</button></li>
-				</div>
-			</div>
-			`
-	})
-	gallery.innerHTML = '';
-	gallery.innerHTML = productsCards;
-})
-
-socket.on('delete_product', data => {
-	//console.log('delete_product:', data);
-	let productsCards = '';
-	productsArray = Object.values(productsArray).filter(p => p._id !== data);
-	productsArray.forEach(p => {
-		productsCards += `
-			<div class="card m-2 p-0" style="width: 16rem;">
-				<img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
-				<div class="card-body">
-					<h5 class="card-title">${p.title}</h5>
-					<p class="card-text">${p.description}</p>
-				</div>
-				<ul class="list-group list-group-flush">
-					<li class="list-group-item">Price: $${p.price}</li>
-					<li class="list-group-item">Stock: ${p.stock}</li>
-					<li class="list-group-item">Code: ${p.code}</li>
-					<li class="list-group-item">ID: ${p._id}</li>
-				</ul>
-				<div class="card-footer text-right">
-				<li class="list-group-item text-end"><button data-id="${p._id}" type="button" class="remove-product btn btn-danger btn-sm">Remove</button></li>
-				</div>
-			</div>
-			`
-	})
-	gallery.innerHTML = '';
-	gallery.innerHTML = productsCards;
-	if (gallery.innerHTML === '') gallery.innerHTML = '<p class="m-1">No products available.</p>';
-})
 
 async function delete_product(id) {
 	//console.log('removeProduct', id);
-	try {
-		const response = await fetch(`http://localhost:3000/api/products/${id}`, {
-			method: 'delete',
-		});
-		if (response.status === 200) {
-			const data = await response.json();
-			socket = io();
-			/* Envia producto respetando id unico, permite ademas,
-				contar con todas las validaciones del endpoint.*/
-			socket.emit('productDelete', data.deletedProduct)
-		} else if (response.status === 400) {
-			const data = await response.json();
-			console.error(data.error);
-		} else {
-			throw new Error('Unexpected response');
+	Swal.fire({
+		title: 'Are you sure?',
+		text: "You won't be able to revert this!",
+		icon: 'warning',
+		showCancelButton: true,
+		confirmButtonColor: '#3085d6',
+		cancelButtonColor: '#d33',
+		confirmButtonText: 'Yes, remove it!'
+	}).then(async (result) => {
+		if (result.isConfirmed) {
+			try {
+				const response = await fetch(`http://localhost:3000/api/products/${id}`, {
+					method: 'delete',
+				});
+				if (response.status === 200) {
+					const data = await response.json();
+					socket = io();
+					/* Envia producto respetando id unico, permite ademas,
+						contar con todas las validaciones del endpoint.*/
+					socket.emit('productDelete', data.deletedProduct)
+					Swal.fire(
+						'Deleted!',
+						'Product has been deleted.',
+						'success'
+					)
+				} else if (response.status === 400) {
+					const data = await response.json();
+					console.error(data.error);
+					Swal.fire(
+						'Ups!',
+						'Something went wrong.',
+						'error'
+					)
+				} else {
+					Swal.fire(
+						'Ups!',
+						'Something went wrong.',
+						'error'
+					)
+					throw new Error('Unexpected response');
+				}
+			} catch (err) {
+				console.error(`Error: ${err}`);
+			}
 		}
-	} catch (err) {
-		console.error(`Error: ${err}`);
-	}
+	})
 }
+
+async function edit_product(id) {
+	// TODO
+}
+
+socket = io();
 
 socket.on('cartCreated', data => {
 	//console.log('cartCreated', data);
@@ -124,7 +104,7 @@ socket.on('cartCreated', data => {
 socket.on('cartUpdated', data => {
 	//console.log('cartUpdated', data);
 	userCart = { _id: data._id, products: data.products };
-	let userCartLength= 0;
+	let userCartLength = 0;
 	for (const p of userCart.products) {
 		userCartLength += p.quantity;
 	}
