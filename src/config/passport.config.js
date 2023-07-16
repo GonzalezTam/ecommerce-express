@@ -1,9 +1,9 @@
 const passport = require('passport');
 const GitHubStrategy = require('passport-github2');
 const local = require('passport-local');
-const userModel = require('./dao/models/user.model.js');
-const { createHash, isValidPassword } = require('./utils.js');
-const dotEnvConfig = require('./config/env.config.js');
+const userModel = require('../dao/models/user.model.js');
+const { createHash, isValidPassword } = require('../utils.js');
+const dotEnvConfig = require('./env.config.js');
 
 const { GITHUB_CALLBACK_URL, GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET } = dotEnvConfig;
 const LocalStrategy = local.Strategy

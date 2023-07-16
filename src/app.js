@@ -5,7 +5,7 @@ const connectDB = require('./db/connect.js');
 const MongoStore = require('connect-mongo');
 
 const passport = require('passport');
-const initializePassport = require('./passport.config.js');
+const initializePassport = require('./config/passport.config.js');
 const dotEnvConfig = require('./config/env.config.js');
 
 const handlebars = require('express-handlebars');

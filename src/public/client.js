@@ -153,7 +153,7 @@ async function update_cart(id) {
 			headers: { 'Content-Type': 'application/json' },
 		});
 		if (response.status === 200) {
-			const fetchUpdatedCart = await fetch(`http://localhost:${PORT}/api/carts/${cartId}`);
+			const fetchUpdatedCart = await fetch(`http://localhost:3000/api/carts/${cartId}`);
 			const dataUpdatedCart = await fetchUpdatedCart.json();
 			socket = io();
 			socket.emit('cartUpdated', dataUpdatedCart.cart)
