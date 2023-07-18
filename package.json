@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Entrega 10 clase 13",
   "main": "src/app.js",
+  "type": "module",
   "scripts": {
     "start": "node .",
     "dev": "nodemon .",
@@ -25,5 +26,12 @@
     "passport-github2": "^0.1.12",
     "passport-local": "^1.0.0",
     "socket.io": "^4.6.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.45.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.27.5",
+    "eslint-plugin-n": "^16.0.1",
+    "eslint-plugin-promise": "^6.1.1"
   }
 }

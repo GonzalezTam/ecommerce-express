@@ -1,91 +1,91 @@
-const express = require('express')
-const router = express.Router()
-const productModel = require('./../models/product.model');
-const dotEnvConfig = require('../config/env.config.js')
+import express from 'express';
+// import productModel from './../models/product.model';
+import dotEnvConfig from '../config/env.config.js';
+const router = express.Router();
 
 const { PORT } = dotEnvConfig;
 
 // if user is not logged in, redirect to login page.
 const auth = (req, res, next) => {
-	if (req.session.user) {
-		if (req.path === '/productsmanager' && req.session.user.role === 'user') return res.redirect('/products')
-		else return next();
-	}
-	const path = req.path;
-	const failed = req.query.failed || true;
-	if (path === '/' && !req.query.failed) return res.redirect('/login');
-	return res.redirect(`/login?failed=${failed}`) //`/login?failed=${failed}
-}
+  if (req.session.user) {
+    if (req.path === '/productsmanager' && req.session.user.role === 'user') return res.redirect('/products');
+    else return next();
+  }
+  const path = req.path;
+  const failed = req.query.failed || true;
+  if (path === '/' && !req.query.failed) return res.redirect('/login');
+  return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
+};
 
 // if user is logged in, redirect to profile.
 const activeSession = (req, res, next) => {
-	if (!req.session.user) return next();
-	return res.redirect('/profile')
-}
+  if (!req.session.user) return next();
+  return res.redirect('/profile');
+};
 
 // if user is logged in, redirect to products page.
-router.get('/', auth, async (req, res) => res.redirect('/products'))
+router.get('/', auth, async (req, res) => res.redirect('/products'));
 
 router.get('/register', activeSession, (req, res) => {
-	const failed = req.query.failed;
-	if (failed) return res.render('register', {message: 'Register Failed. Something went wrong.'})
-	res.render('register')
+  const failed = req.query.failed;
+  if (failed) return res.render('register', { message: 'Register Failed. Something went wrong.' });
+  res.render('register');
 });
 
 router.get('/login', activeSession, (req, res) => {
-	const failed = req.query.failed;
-	if (failed === 'true') return res.render('login', {message: 'Login Failed. Username or password incorrect.'})
-	if (failed === 'github') return res.render('login', {message: 'Github login failed. Something went wrong..'})
-	res.render('login')
+  const failed = req.query.failed;
+  if (failed === 'true') return res.render('login', { message: 'Login Failed. Username or password incorrect.' });
+  if (failed === 'github') return res.render('login', { message: 'Github login failed. Something went wrong..' });
+  res.render('login');
 });
 
 router.get('/profile', auth, (req, res) => {
-	const isAdmin = req.session.user?.role === 'admin' ? true : false;
-	res.render('profile', {user: req.session.user, isAdmin: isAdmin})
-})
+  const isAdmin = req.session.user?.role === 'admin';
+  res.render('profile', { user: req.session.user, isAdmin });
+});
 
 router.get('/products', auth, async (req, res) => {
-	const user = req.session?.user;
-	const isAdmin = req.session.user?.role === 'admin' ? true : false;
-	let page = +req.query.page;
-	if (!page) page = 1
-	let result;
-	await fetch(`http://localhost:${PORT}/api/products?page=${page}`)
-		.then(res => res.json())
-		.then(data => {
-			result = data;
-		})
-		.catch(err => console.log(err))
-  return res.render('products', {user: user, isAdmin: isAdmin, products: result.products})
-})
+  const user = req.session?.user;
+  const isAdmin = req.session.user?.role === 'admin';
+  let page = +req.query.page;
+  if (!page) page = 1;
+  let result;
+  await fetch(`http://localhost:${PORT}/api/products?page=${page}`)
+    .then(res => res.json())
+    .then(data => {
+      result = data;
+    })
+    .catch(err => console.log(err));
+  return res.render('products', { user, isAdmin, products: result.products });
+});
 
 // This route is for admin user only
 router.get('/productsmanager', auth, async (req, res) => {
-	const user = req.session?.user;
-	const isAdmin = req.session.user?.role === 'admin' ? true : false;
-	let page = +req.query.page;
-	if (!page) page = 1
-	let result;
-	await fetch(`http://localhost:${PORT}/api/products/manager?page=${page}`)
-		.then(res => res.json())
-		.then(data => {
-			result = data;
-		})
-		.catch(err => console.log(err))
-  return res.render('productsmanager', {user: user, isAdmin: isAdmin, products: result.products})
-})
+  const user = req.session?.user;
+  const isAdmin = req.session.user?.role === 'admin';
+  let page = +req.query.page;
+  if (!page) page = 1;
+  let result;
+  await fetch(`http://localhost:${PORT}/api/products/manager?page=${page}`)
+    .then(res => res.json())
+    .then(data => {
+      result = data;
+    })
+    .catch(err => console.log(err));
+  return res.render('productsmanager', { user, isAdmin, products: result.products });
+});
 
 router.get('/carts/:cid', auth, async (req, res) => {
-	let cid = req.params.cid;
-	let result;
-	await fetch(`http://localhost:${PORT}/api/carts/${cid}`)
-		.then(res => res.json())
-		.then(data => {
-			result = data.cart;
-		})
-		.catch(err => console.log(err))
-		if (!result) return res.status(404).send({ 'Cart not found' : cid });
-		res.render('cart', {products: result?.products})
-})
+  const cid = req.params.cid;
+  let result;
+  await fetch(`http://localhost:${PORT}/api/carts/${cid}`)
+    .then(res => res.json())
+    .then(data => {
+      result = data.cart;
+    })
+    .catch(err => console.log(err));
+  if (!result) return res.status(404).send({ 'Cart not found': cid });
+  res.render('cart', { products: result?.products });
+});
 
-module.exports = router
+export default router;
