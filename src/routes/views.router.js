@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const productModel = require('./../dao/models/product.model');
+const productModel = require('./../models/product.model');
 const dotEnvConfig = require('../config/env.config.js')
 
 const { PORT } = dotEnvConfig;

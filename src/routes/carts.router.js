@@ -1,6 +1,6 @@
 const { Router } = require('express');
-const cartModel = require('./../dao/models/cart.model');
-const productModel = require('./../dao/models/product.model');
+const cartModel = require('./../models/cart.model');
+const productModel = require('./../models/product.model');
 
 const router = Router();
 

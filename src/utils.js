@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const userModel = require('./dao/models/user.model.js');
+const userModel = require('./models/user.model.js');
 
 const registerValidations = async (req, res, next) => {
 	const emailRegex = /\S+@\S+\.\S+/;
