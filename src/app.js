@@ -1,7 +1,7 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import session from 'express-session';
-import connectDB from './db/connect.js';
+import connectDB from './daos/MongoConnect.js';
 import MongoStore from 'connect-mongo';
 
 import passport from 'passport';

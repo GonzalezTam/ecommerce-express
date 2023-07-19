@@ -1,5 +1,5 @@
 import bcrypt from 'bcrypt';
-import userModel from './models/user.model.js';
+import userModel from './daos/models/user.model.js';
 
 export const registerValidations = async (req, res, next) => {
   const emailRegex = /\S+@\S+\.\S+/;

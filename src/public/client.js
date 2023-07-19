@@ -41,6 +41,18 @@ document.addEventListener('click', function (e) {
   }
 }, false);
 
+socket = io();
+socket.on('new_product', data => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  document.location.href = `/productsmanager?${urlParams}`;
+});
+socket.on('delete_product', data => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  document.location.href = `/productsmanager?${urlParams}`;
+});
+
 async function delete_product (id) {
   // console.log('removeProduct', id);
   Swal.fire({
@@ -54,35 +66,40 @@ async function delete_product (id) {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        const response = await fetch(`http://localhost:3000/api/products/${id}`, {
+        fetch(`http://localhost:3000/api/products/${id}`, {
           method: 'delete'
+        }).then(async (response) => {
+          const data = await response.json();
+          if (data.status === 200) {
+            const swalNoConfirmButton = Swal.mixin({
+              showConfirmButton: false
+            });
+            swalNoConfirmButton.fire(
+              'Deleted!',
+              'Product has been deleted.',
+              'success',
+              setTimeout(() => {
+                /* Envia producto respetando id unico, permite ademas, contar con todas las validaciones del endpoint. */
+                socket = io();
+                socket.emit('productDelete', data.deletedProduct);
+              }, 1000)
+            );
+          } else if (data.status === 400) {
+            console.error(data.error);
+            Swal.fire(
+              'Ups!',
+              'Something went wrong.',
+              'error'
+            );
+          } else {
+            Swal.fire(
+              'Ups!',
+              'Something went wrong.',
+              'error'
+            );
+            throw new Error('Unexpected response');
+          }
         });
-        if (response.status === 200) {
-          const data = await response.json();
-          socket = io();
-          /* Envia producto respetando id unico, permite ademas, contar con todas las validaciones del endpoint. */
-          socket.emit('productDelete', data.deletedProduct);
-          Swal.fire(
-            'Deleted!',
-            'Product has been deleted.',
-            'success'
-          );
-        } else if (response.status === 400) {
-          const data = await response.json();
-          console.error(data.error);
-          Swal.fire(
-            'Ups!',
-            'Something went wrong.',
-            'error'
-          );
-        } else {
-          Swal.fire(
-            'Ups!',
-            'Something went wrong.',
-            'error'
-          );
-          throw new Error('Unexpected response');
-        }
       } catch (err) {
         console.error(`Error: ${err}`);
       }
@@ -172,7 +189,6 @@ async function update_cart (id) {
 
 submit?.addEventListener('click', async (e) => {
   e.preventDefault();
-  // console.log('submit');
   try {
     const body = {
       title: title.value,
@@ -182,22 +198,37 @@ submit?.addEventListener('click', async (e) => {
       stock: parseInt(stock.value),
       code: code.value
     };
-    const response = await fetch('http://localhost:3000/api/products', {
+    fetch('http://localhost:3000/api/products', {
       method: 'post',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
+    }).then(async (response) => {
+      const data = await response.json();
+      if (data.status === 201) {
+        const swalNoConfirmButton = Swal.mixin({
+          showConfirmButton: false
+        });
+        swalNoConfirmButton.fire(
+          'Success!',
+          'A new product has been added.',
+          'success',
+          setTimeout(() => {
+            /* Envia producto respetando id unico, permite ademas, contar con todas las validaciones del endpoint. */
+            socket = io();
+            socket.emit('productSubmit', data.newProduct);
+          }, 1000)
+        );
+      } else if (data.status === 400) {
+        Swal.fire(
+          'Ups!',
+          'Something went wrong.',
+          'error'
+        );
+        console.error(data.error);
+      } else {
+        throw new Error(data.error || 'Unexpected response');
+      }
     });
-    if (response.status === 200) {
-      const data = await response.json();
-      socket = io();
-      /* Envia producto respetando id unico, permite ademas, contar con todas las validaciones del endpoint. */
-      socket.emit('productSubmit', data.newProduct);
-    } else if (response.status === 400) {
-      const data = await response.json();
-      console.error(data.error);
-    } else {
-      throw new Error('Unexpected response');
-    }
   } catch (err) {
     console.error(`Error: ${err}`);
   }
