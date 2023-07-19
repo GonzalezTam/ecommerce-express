@@ -14,6 +14,9 @@ const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL;
 
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+
 const dotEnvConfig = {
   PORT,
   SOCKET_PORT,
@@ -23,7 +26,9 @@ const dotEnvConfig = {
   SECRET,
   GITHUB_CLIENT_ID,
   GITHUB_CLIENT_SECRET,
-  GITHUB_CALLBACK_URL
+  GITHUB_CALLBACK_URL,
+  ADMIN_EMAIL,
+  ADMIN_PASSWORD
 };
 
 // Export module

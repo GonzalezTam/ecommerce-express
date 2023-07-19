@@ -1,5 +1,9 @@
 import bcrypt from 'bcrypt';
-import userModel from './daos/models/user.model.js';
+import passport from 'passport';
+import userModel from '../daos/models/user.model.js';
+import dotEnvConfig from '../config/env.config.js';
+
+const { ADMIN_EMAIL, ADMIN_PASSWORD } = dotEnvConfig;
 
 export const registerValidations = async (req, res, next) => {
   const emailRegex = /\S+@\S+\.\S+/;
@@ -31,18 +35,18 @@ export const loginValidations = (req, res, next) => {
   if (!password) return res.status(400).send({ message: 'Password is required.' });
 
   // Hardcoded admin user
-  if (email === 'adminCoder@coder.com') {
-    if (password !== 'adminCod3r123') return res.status(401).send({ message: 'Login failed. Wrong password.' });
+  if (email === ADMIN_EMAIL) {
+    if (password !== ADMIN_PASSWORD) return res.status(401).send({ message: 'Login failed. Wrong password.' });
     const reqSessionUser = {
       _id: undefined,
       email,
-      firstName: 'Coder',
-      lastName: 'House',
-      age: 100,
+      firstName: 'Administrator',
+      lastName: null,
+      age: null,
       role: 'admin'
     };
     req.session.user = reqSessionUser;
-    return res.send({ message: 'Login success!', user: reqSessionUser });
+    return res.send({ message: 'Login success!', user: reqSessionUser, status: 200 });
   }
   next();
 };
@@ -55,4 +59,9 @@ export const isValidPassword = (user, password) => {
   return bcrypt.compareSync(password, user.password);
 };
 
-export default { loginValidations, registerValidations, createHash, isValidPassword };
+export const passportRegister = passport.authenticate('register', { failureRedirect: '/register?failed=true' });
+export const passportLogIn = passport.authenticate('login', { failureRedirect: '/login?failed=true' });
+export const passportGitHubAuth = passport.authenticate('github', { scope: ['user:email'] });
+export const passportGitHubCallback = passport.authenticate('github', { failureRedirect: '/login?failed=github' });
+
+export default { loginValidations, registerValidations, createHash, isValidPassword, passportRegister, passportLogIn, passportGitHubAuth, passportGitHubCallback };
