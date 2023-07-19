@@ -12,9 +12,7 @@ import handlebars from 'express-handlebars';
 import { Server } from 'socket.io';
 
 import viewsRouter from './routes/views.router.js';
-import productsRouter from './routes/products.router.js';
-import cartsRouter from './routes/carts.router.js';
-import sessionRouter from './routes/session.router.js';
+import apiRouter from './routes/api.router.js';
 
 const { PORT, SOCKET_PORT, MONGO_URI, MONGO_DB_SESSION, SECRET } = dotEnvConfig;
 
@@ -46,15 +44,12 @@ try {
   initializePassport();
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use('/api', apiRouter);
+  app.use('/', viewsRouter);
 
   app.engine('handlebars', handlebars.engine());
   app.set('views', './src/views');
   app.set('view engine', 'handlebars');
-
-  app.use('/api/products', productsRouter);
-  app.use('/api/carts', cartsRouter);
-  app.use('/api/session', sessionRouter);
-  app.use('/', viewsRouter);
 
   const socketServer = new Server(httpServer, { port: SOCKET_PORT });
 

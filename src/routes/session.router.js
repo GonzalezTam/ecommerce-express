@@ -2,13 +2,13 @@ import { Router } from 'express';
 import sessionsController from '../controllers/session.controller.js';
 import { registerValidations, loginValidations, passportRegister, passportLogIn, passportGitHubAuth, passportGitHubCallback } from '../middlewares/auth.js';
 
-const router = Router();
+const sessionRouter = Router();
 
-router.post('/register', registerValidations, passportRegister, sessionsController.register);
-router.post('/login', loginValidations, passportLogIn, sessionsController.login);
-router.get('/logout', sessionsController.logout);
-router.get('/github', passportGitHubAuth);
-router.get('/githubcallback', passportGitHubCallback, sessionsController.githubCallback);
-router.get('/current', sessionsController.getCurrent);
+sessionRouter.post('/register', registerValidations, passportRegister, sessionsController.register);
+sessionRouter.post('/login', loginValidations, passportLogIn, sessionsController.login);
+sessionRouter.get('/logout', sessionsController.logout);
+sessionRouter.get('/github', passportGitHubAuth);
+sessionRouter.get('/githubcallback', passportGitHubCallback, sessionsController.githubCallback);
+sessionRouter.get('/current', sessionsController.getCurrent);
 
-export default router;
+export default sessionRouter;

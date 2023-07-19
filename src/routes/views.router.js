@@ -1,7 +1,7 @@
-import express from 'express';
+import { Router } from 'express';
 // import productModel from './../models/product.model';
 import dotEnvConfig from '../config/env.config.js';
-const router = express.Router();
+const viewsRouter = Router();
 
 const { PORT } = dotEnvConfig;
 
@@ -24,27 +24,27 @@ const activeSession = (req, res, next) => {
 };
 
 // if user is logged in, redirect to products page.
-router.get('/', auth, async (req, res) => res.redirect('/products'));
+viewsRouter.get('/', auth, async (req, res) => res.redirect('/products'));
 
-router.get('/register', activeSession, (req, res) => {
+viewsRouter.get('/register', activeSession, (req, res) => {
   const failed = req.query.failed;
   if (failed) return res.render('register', { message: 'Register Failed. Something went wrong.' });
   res.render('register');
 });
 
-router.get('/login', activeSession, (req, res) => {
+viewsRouter.get('/login', activeSession, (req, res) => {
   const failed = req.query.failed;
   if (failed === 'true') return res.render('login', { message: 'Login Failed. Username or password incorrect.' });
   if (failed === 'github') return res.render('login', { message: 'Github login failed. Something went wrong..' });
   res.render('login');
 });
 
-router.get('/profile', auth, (req, res) => {
+viewsRouter.get('/profile', auth, (req, res) => {
   const isAdmin = req.session.user?.role === 'admin';
   res.render('profile', { user: req.session.user, isAdmin });
 });
 
-router.get('/products', auth, async (req, res) => {
+viewsRouter.get('/products', auth, async (req, res) => {
   const user = req.session?.user;
   const isAdmin = req.session.user?.role === 'admin';
   let page = +req.query.page;
@@ -60,7 +60,7 @@ router.get('/products', auth, async (req, res) => {
 });
 
 // This route is for admin user only
-router.get('/productsmanager', auth, async (req, res) => {
+viewsRouter.get('/productsmanager', auth, async (req, res) => {
   const user = req.session?.user;
   const isAdmin = req.session.user?.role === 'admin';
   let page = +req.query.page;
@@ -75,7 +75,7 @@ router.get('/productsmanager', auth, async (req, res) => {
   return res.render('productsmanager', { user, isAdmin, products: result.products });
 });
 
-router.get('/carts/:cid', auth, async (req, res) => {
+viewsRouter.get('/carts/:cid', auth, async (req, res) => {
   const cid = req.params.cid;
   let result;
   await fetch(`http://localhost:${PORT}/api/carts/${cid}`)
@@ -88,4 +88,4 @@ router.get('/carts/:cid', auth, async (req, res) => {
   res.render('cart', { products: result?.products });
 });
 
-export default router;
+export default viewsRouter;

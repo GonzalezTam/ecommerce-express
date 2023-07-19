@@ -2,14 +2,14 @@ import { Router } from 'express';
 import cartModel from '../daos/models/cart.model.js';
 import productModel from '../daos/models/product.model.js';
 
-const router = Router();
+const cartsRouter = Router();
 
-router.get('/', async (req, res) => {
+cartsRouter.get('/', async (req, res) => {
   const carts = await cartModel.find().lean().exec();
   res.send({ carts });
 });
 
-router.get('/:cid', async (req, res) => {
+cartsRouter.get('/:cid', async (req, res) => {
   const id = req.params.cid;
   try {
     const cart = await cartModel.findOne({ _id: id }).populate('products.productId').lean().exec();
@@ -20,7 +20,7 @@ router.get('/:cid', async (req, res) => {
   }
 });
 
-router.put('/:cid', async (req, res) => {
+cartsRouter.put('/:cid', async (req, res) => {
   const id = req.params.cid;
   const { products } = req.body;
   if (!products) {
@@ -40,7 +40,7 @@ router.put('/:cid', async (req, res) => {
   }
 });
 
-router.delete('/:cid', async (req, res) => {
+cartsRouter.delete('/:cid', async (req, res) => {
   const id = req.params.cid;
   try {
     const cart = await cartModel.findOne({ _id: id }).lean().exec();
@@ -51,7 +51,7 @@ router.delete('/:cid', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+cartsRouter.post('/', async (req, res) => {
   const { products } = req.body;
   if (!products) {
     res.status(400).send({ error: 'No Products provided' });
@@ -65,7 +65,7 @@ router.post('/', async (req, res) => {
   res.status(200).send({ cartCreated: cart });
 });
 
-router.post('/:cid/products/:pid', async (req, res) => {
+cartsRouter.post('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const quantity = 0;
@@ -98,7 +98,7 @@ router.post('/:cid/products/:pid', async (req, res) => {
   }
 });
 
-router.put('/:cid/products/:pid', async (req, res) => {
+cartsRouter.put('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const quantity = +req.body.quantity;
@@ -128,7 +128,7 @@ router.put('/:cid/products/:pid', async (req, res) => {
   }
 });
 
-router.delete('/:cid/products/:pid', async (req, res) => {
+cartsRouter.delete('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   try {
@@ -151,4 +151,4 @@ router.delete('/:cid/products/:pid', async (req, res) => {
   }
 });
 
-export default router;
+export default cartsRouter;
