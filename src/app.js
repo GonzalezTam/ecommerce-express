@@ -67,6 +67,10 @@ try {
       const pid = data._id;
       socketServer.emit('delete_product', pid);
     });
+    socketClient.on('productUpdate', (data) => {
+      const p = data;
+      socketServer.emit('update_product', p);
+    });
     socketClient.on('cartCreated', (data) => {
       const cart = data;
       socketServer.emit('cartCreated', cart);

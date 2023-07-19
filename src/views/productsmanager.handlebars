@@ -32,48 +32,49 @@
   </div>
 </nav>
 
-<div class="container">
+<div class="container" id="manager-container">
   <div class="row mt-4">
-    <h1>Add New Product</h1>
+    <h1 id="manager-title">Add New Product</h1>
   </div>
-  <div class="row g-3 mt-2">
+  <div class="row g-3 mt-2" id="manager-sub-container">
     <div class="row">
       <div class="col-4">
         <label class="form-label" for="title">Title</label>
-        <input class="form-control" type="text" name="title" id="title" value="Product" required>
+        <input class="form-control" type="text" name="title" id="title" placeholder="Product" required>
       </div>
       <div class="col-4">
         <label class="form-label" for="category">Category</label>
-        <input class="form-control" type="text" name="category" id="category" value="Category" required>
+        <input class="form-control" type="text" name="category" id="category" placeholder="Category" required>
       </div>
     </div>
     <div class="row mt-2">
       <div class="col-3">
         <label class="form-label" for="price">Price</label>
-        <input class="form-control" type="number" name="price" id="price" value="100" required>
+        <input class="form-control" type="number" name="price" id="price" placeholder="100" required>
       </div>
       <div class="col-2">
         <label class="form-label" for="stock">Stock</label>
-        <input class="form-control" type="number" name="stock" id="stock" value="5" required>
+        <input class="form-control" type="number" name="stock" id="stock" placeholder="5" required>
       </div>
       <div class="col-3">
         <label class="form-label" for="code">Code</label>
-        <input class="form-control" type="text" name="code" id="code" value="xxx-1" required>
+        <input class="form-control" type="text" name="code" id="code" placeholder="xxx-1" required>
       </div>
     </div>
     <div class="row mt-2">
       <div class="col-8">
         <label class="form-label" for="description">Description</label>
         <input class="form-control" type="text" name="description" id="description"
-          value="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt." required>
+          placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt." required>
       </div>
     </div>
-    <div class="col-12">
-      <button id="submit" class="btn btn-primary btn-sm">Submit</button>
+    <div class="col-12 mx-1">
+      <button id="submitProduct" class="btn btn-primary btn-sm">Add New</button>
+      <button id="updateProduct" class="btn btn-warning btn-sm" disabled>Update</button>
     </div>
   </div>
 
-  <div class="row mt-4">
+  <div class="row mt-4 mb-2">
     <h1>Products</h1>
   </div>
 

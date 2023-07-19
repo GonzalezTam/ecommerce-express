@@ -12,7 +12,7 @@ const getAllProductsManager = async (req, res) => {
 
 const getProductsById = async (req, res) => {
   const result = await productsService.getProductsById(req);
-  res.send({ products: result });
+  res.send(result);
 };
 
 const createProduct = async (req, res) => {

@@ -3,6 +3,7 @@
 /* eslint-disable no-undef */
 let productsArray = [];
 let userCart;
+let socket;
 
 document.onreadystatechange = async () => {
   const products = (location.pathname === '/productsmanager') ? '/products/manager' : '/products';
@@ -14,8 +15,11 @@ document.onreadystatechange = async () => {
     .catch(err => console.log(err));
 };
 
-let socket;
-const submit = document.getElementById('submit');
+const managerContainer = document.getElementById('manager-container');
+const managerSubContainer = document.getElementById('manager-sub-container');
+const managerTitle = document.getElementById('manager-title');
+const submitProduct = document.getElementById('submitProduct');
+const updateProduct = document.getElementById('updateProduct');
 const removeProduct = document.getElementsByClassName('remove-product');
 const editProduct = document.getElementsByClassName('edit-product');
 const cart = document.getElementById('my-cart');
@@ -47,14 +51,31 @@ socket.on('new_product', data => {
   const urlParams = new URLSearchParams(queryString);
   document.location.href = `/productsmanager?${urlParams}`;
 });
+socket.on('update_product', data => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  document.location.href = `/productsmanager?${urlParams}`;
+});
 socket.on('delete_product', data => {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   document.location.href = `/productsmanager?${urlParams}`;
 });
+socket.on('cartCreated', data => {
+  userCart = { _id: data._id, products: data.products };
+  const userCartLength = userCart.products?.length || 0;
+  cart.innerHTML = '🛒 (' + userCartLength + ')';
+});
+socket.on('cartUpdated', data => {
+  userCart = { _id: data._id, products: data.products };
+  let userCartLength = 0;
+  for (const p of userCart.products) {
+    userCartLength += p.quantity;
+  }
+  cart.innerHTML = '🛒 (' + userCartLength + ')';
+});
 
 async function delete_product (id) {
-  // console.log('removeProduct', id);
   Swal.fire({
     title: 'Are you sure?',
     text: "You won't be able to revert this!",
@@ -79,7 +100,6 @@ async function delete_product (id) {
               'Product has been deleted.',
               'success',
               setTimeout(() => {
-                /* Envia producto respetando id unico, permite ademas, contar con todas las validaciones del endpoint. */
                 socket = io();
                 socket.emit('productDelete', data.deletedProduct);
               }, 1000)
@@ -108,27 +128,18 @@ async function delete_product (id) {
 }
 
 async function edit_product (id) {
-  // TODO
+  const product = productsArray.find(p => p._id === id);
+  managerTitle.innerHTML = 'Edit product or <a href="/productsmanager">create new</a>';
+  title.value = product.title;
+  category.value = product.category;
+  description.value = product.description;
+  price.value = product.price;
+  stock.value = product.stock;
+  code.value = product.code;
+  updateProduct.disabled = false;
+  updateProduct.dataset.id = id;
+  submitProduct.disabled = true;
 }
-
-socket = io();
-
-socket.on('cartCreated', data => {
-  // console.log('cartCreated', data);
-  userCart = { _id: data._id, products: data.products };
-  const userCartLength = userCart.products?.length || 0;
-  cart.innerHTML = '🛒 (' + userCartLength + ')';
-});
-
-socket.on('cartUpdated', data => {
-  // console.log('cartUpdated', data);
-  userCart = { _id: data._id, products: data.products };
-  let userCartLength = 0;
-  for (const p of userCart.products) {
-    userCartLength += p.quantity;
-  }
-  cart.innerHTML = '🛒 (' + userCartLength + ')';
-});
 
 async function create_cart (id) {
   // console.log('first_in_cart', id);
@@ -162,8 +173,6 @@ async function create_cart (id) {
 }
 
 async function update_cart (id) {
-  // console.log('productId', id);
-  // console.log('cartId', userCart._id);
   const cartId = userCart._id;
   const productId = id;
   try {
@@ -187,49 +196,116 @@ async function update_cart (id) {
   }
 }
 
-submit?.addEventListener('click', async (e) => {
+submitProduct?.addEventListener('click', async (e) => {
   e.preventDefault();
-  try {
-    const body = {
-      title: title.value,
-      category: category.value,
-      description: description.value,
-      price: parseInt(price.value),
-      stock: parseInt(stock.value),
-      code: code.value
-    };
-    fetch('http://localhost:3000/api/products', {
-      method: 'post',
-      body: JSON.stringify(body),
-      headers: { 'Content-Type': 'application/json' }
-    }).then(async (response) => {
-      const data = await response.json();
-      if (data.status === 201) {
-        const swalNoConfirmButton = Swal.mixin({
-          showConfirmButton: false
-        });
-        swalNoConfirmButton.fire(
-          'Success!',
-          'A new product has been added.',
-          'success',
-          setTimeout(() => {
-            /* Envia producto respetando id unico, permite ademas, contar con todas las validaciones del endpoint. */
-            socket = io();
-            socket.emit('productSubmit', data.newProduct);
-          }, 1000)
-        );
-      } else if (data.status === 400) {
-        Swal.fire(
-          'Ups!',
-          'Something went wrong.',
-          'error'
-        );
-        console.error(data.error);
-      } else {
-        throw new Error(data.error || 'Unexpected response');
-      }
-    });
-  } catch (err) {
-    console.error(`Error: ${err}`);
+  if (!title.value || !category.value || !description.value || !price.value || !stock.value || !code.value) {
+    Swal.fire(
+      'Ups!',
+      'All fields are required.',
+      'error'
+    );
+  } else {
+    try {
+      const body = {
+        title: title.value,
+        category: category.value,
+        description: description.value,
+        price: parseInt(price.value),
+        stock: parseInt(stock.value),
+        code: code.value
+      };
+      fetch('http://localhost:3000/api/products', {
+        method: 'post',
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (response) => {
+        const data = await response.json();
+        if (data.status === 201) {
+          const swalNoConfirmButton = Swal.mixin({
+            showConfirmButton: false
+          });
+          swalNoConfirmButton.fire(
+            'Success!',
+            'A new product has been added.',
+            'success',
+            setTimeout(() => {
+              socket = io();
+              socket.emit('productSubmit', data.newProduct);
+            }, 1000)
+          );
+        } else if (data.status === 400) {
+          Swal.fire(
+            'Ups!',
+            'Something went wrong.',
+            'error'
+          );
+          console.error(data.error);
+        } else {
+          throw new Error(data.error || 'Unexpected response');
+        }
+      });
+    } catch (err) {
+      console.error(`Error: ${err}`);
+    }
+  }
+});
+
+updateProduct?.addEventListener('click', async (e) => {
+  e.preventDefault();
+  if (!title.value || !category.value || !description.value || !price.value || !stock.value || !code.value) {
+    Swal.fire(
+      'Ups!',
+      'All fields are required.',
+      'error'
+    );
+  } else {
+    try {
+      const body = {
+        title: title.value,
+        category: category.value,
+        description: description.value,
+        price: parseInt(price.value),
+        stock: parseInt(stock.value),
+        code: code.value
+      };
+      const id = updateProduct.dataset.id;
+      fetch(`http://localhost:3000/api/products/${id}`, {
+        method: 'put',
+        body: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(async (response) => {
+        const data = await response.json();
+        if (data.status === 200) {
+          const swalNoConfirmButton = Swal.mixin({
+            showConfirmButton: false
+          });
+          swalNoConfirmButton.fire(
+            'Success!',
+            'Product has been updated.',
+            'success',
+            setTimeout(() => {
+              socket = io();
+              socket.emit('productUpdate', data.updatedProduct);
+            }, 1000)
+          );
+        } else if (data.status === 400) {
+          console.error(data.error);
+          Swal.fire(
+            'Ups!',
+            'Something went wrong.',
+            'error'
+          );
+        } else {
+          Swal.fire(
+            'Ups!',
+            'Something went wrong.',
+            'error'
+          );
+          throw new Error('Unexpected response');
+        }
+      });
+    } catch (err) {
+      console.error(`Error: ${err}`);
+    }
   }
 });
