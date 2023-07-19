@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import passport from 'passport';
-import userModel from '../daos/models/user.model.js';
+import userModel from '../dao/models/user.model.js';
 import dotEnvConfig from '../config/env.config.js';
 
 const { ADMIN_EMAIL, ADMIN_PASSWORD } = dotEnvConfig;

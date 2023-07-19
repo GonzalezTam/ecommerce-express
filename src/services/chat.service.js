@@ -1,4 +1,4 @@
-import messageModel from '../daos/models/message.model.js';
+import messageModel from '../dao/models/message.model.js';
 
 const getMessages = async (req) => {
   try {
