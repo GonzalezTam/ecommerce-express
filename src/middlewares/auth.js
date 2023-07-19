@@ -5,6 +5,24 @@ import dotEnvConfig from '../config/env.config.js';
 
 const { ADMIN_EMAIL, ADMIN_PASSWORD } = dotEnvConfig;
 
+// if user is not logged in, redirect to login page.
+export const auth = (req, res, next) => {
+  if (req.session.user) {
+    if (req.path === '/productsmanager' && req.session.user.role === 'user') return res.redirect('/products');
+    else return next();
+  }
+  const path = req.path;
+  const failed = req.query.failed || true;
+  if (path === '/' && !req.query.failed) return res.redirect('/login');
+  return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
+};
+
+// if user is logged in, redirect to profile.
+export const activeSession = (req, res, next) => {
+  if (!req.session.user) return next();
+  return res.redirect('/profile');
+};
+
 export const registerValidations = async (req, res, next) => {
   const emailRegex = /\S+@\S+\.\S+/;
   const { email, password, password2, firstName, lastName, age } = req.body;
@@ -64,4 +82,15 @@ export const passportLogIn = passport.authenticate('login', { failureRedirect: '
 export const passportGitHubAuth = passport.authenticate('github', { scope: ['user:email'] });
 export const passportGitHubCallback = passport.authenticate('github', { failureRedirect: '/login?failed=github' });
 
-export default { loginValidations, registerValidations, createHash, isValidPassword, passportRegister, passportLogIn, passportGitHubAuth, passportGitHubCallback };
+export default {
+  auth,
+  activeSession,
+  loginValidations,
+  registerValidations,
+  createHash,
+  isValidPassword,
+  passportRegister,
+  passportLogIn,
+  passportGitHubAuth,
+  passportGitHubCallback
+};

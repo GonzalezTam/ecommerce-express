@@ -1,27 +1,9 @@
 import { Router } from 'express';
-// import productModel from './../models/product.model';
 import dotEnvConfig from '../config/env.config.js';
+import { auth, activeSession } from '../middlewares/auth.js';
 const viewsRouter = Router();
 
 const { PORT } = dotEnvConfig;
-
-// if user is not logged in, redirect to login page.
-const auth = (req, res, next) => {
-  if (req.session.user) {
-    if (req.path === '/productsmanager' && req.session.user.role === 'user') return res.redirect('/products');
-    else return next();
-  }
-  const path = req.path;
-  const failed = req.query.failed || true;
-  if (path === '/' && !req.query.failed) return res.redirect('/login');
-  return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
-};
-
-// if user is logged in, redirect to profile.
-const activeSession = (req, res, next) => {
-  if (!req.session.user) return next();
-  return res.redirect('/profile');
-};
 
 // if user is logged in, redirect to products page.
 viewsRouter.get('/', auth, async (req, res) => res.redirect('/products'));
@@ -86,6 +68,20 @@ viewsRouter.get('/carts/:cid', auth, async (req, res) => {
     .catch(err => console.log(err));
   if (!result) return res.status(404).send({ 'Cart not found': cid });
   res.render('cart', { products: result?.products });
+});
+
+viewsRouter.get('/chat', auth, async (req, res) => {
+  const user = req.session?.user;
+  const isAdmin = req.session.user?.role === 'admin';
+  let result;
+  await fetch(`http://localhost:${PORT}/api/chat`)
+
+    .then(res => res.json())
+    .then(data => {
+      result = data.messages;
+    })
+    .catch(err => console.log(err));
+  return res.render('chat', { user, isAdmin, messages: result });
 });
 
 export default viewsRouter;

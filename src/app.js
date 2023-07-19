@@ -74,6 +74,10 @@ try {
       const cart = data;
       socketServer.emit('cartUpdated', cart);
     });
+    socketClient.on('messageSent', (data) => {
+      const m = data;
+      socketServer.emit('history', m);
+    });
   });
 } catch (error) {
   // console.log(error)

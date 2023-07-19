@@ -1,0 +1,73 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01"
+		aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse justify-content-between" id="navbarTogglerDemo01">
+		<ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+			<a class="navbar-brand" href="#">🕹</a>
+			<li class="nav-item">
+				<a class="nav-link" href="/products"><b>Products</b></a>
+			</li>
+			<li class="nav-item">
+				<a class="nav-link" href="/profile">Profile</a>
+			</li>
+			<li class="nav-item ml-2 active">
+				<a class="nav-link" id="chat-access" href="/chat">Chat 💬</a>
+			</li>
+			{{!--<li class="nav-item">
+				<a class="nav-link disabled" href="#">Disabled</a>
+			</li>--}}
+			<!-- Admin does not have access to cart -->
+			{{#unless isAdmin}}
+			<li class="nav-item">
+				<a class="nav-link disabled" id="my-cart" href="#">🛒 (0)</a>
+			</li>
+			{{/unless}}
+			<span class="navbar-text gap-5" style="color: #adadad">
+				Welcome {{user.firstName}} {{user.lastName}}. Your account type is: {{user.role}}.
+			</span>
+		</ul>
+		<form class="form-inline my-2 my-lg-0">
+			<!-- Admin has access to admin panel -->
+			{{#if isAdmin}}
+			<button class="btn btn-sm btn-light my-2 my-sm-0" id="adminPanel-button">⚙</button>
+			{{/if}}
+			<button class="btn btn-sm btn-danger my-2 my-sm-0" id="logout-button">Logout</button>
+		</form>
+	</div>
+</nav>
+
+<div class="container">
+	<div class="row mt-3 justify-content-center">
+		<div class="col-sm-10 col-md-12 col-lg-12 justify-content-center" style="height: 70vh">
+			<div class="container mt-4 pb-4">
+				<h5>Welcome to our chat! You are logged in as {{user.email}}</h5>
+				{{#if isAdmin}}
+				<p class="m-auto"> <i>Admins can only see messages, but not send them.</i></p>
+				{{/if}}
+			</div>
+
+			{{#if messages.length}}
+			<div id="history" style="overflow: scroll; overflow-x: auto; height: 100%;">
+				{{#each messages}}
+				<div class="container message"><span class="mx-4 small"
+						style="color:lightgray">{{this.date}}</span><strong>[{{this.user}}]</strong>: {{this.message}}</div>
+				{{/each}}
+			</div>
+			{{else}}
+			<div id="history" style="overflow: scroll; overflow-x: auto;"></div>
+			{{/if}}
+
+			<div class="mt-2 mb-2 d-flex">
+				<input id="user" type="text" value={{user.email}} hidden>
+				<p class="mx-3 m-auto" style="font-size: 30px;">🗣</p>
+				<input id="chatBox" style="width: 100%" type="text" {{#if isAdmin}}disabled{{/if}}>
+			</div>
+		</div>
+	</div>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="chat.js" type="module"></script>

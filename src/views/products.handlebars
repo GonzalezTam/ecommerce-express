@@ -12,6 +12,9 @@
       <li class="nav-item">
         <a class="nav-link" href="/profile">Profile</a>
       </li>
+      <li class="nav-item ml-2">
+        <a class="nav-link" id="chat-access" href="/chat">Chat 💬</a>
+      </li>
       {{!--<li class="nav-item">
         <a class="nav-link disabled" href="#">Disabled</a>
       </li>--}}
@@ -39,11 +42,6 @@
   <div class="row mt-5">
     <h1>Products</h1>
   </div>
-  {{#if user}}
-  <div class="alert alert-info mb-4" id="userWelcomeAlert" role="alert" hidden>
-    Welcome {{user.firstName}}, you are logged in!
-  </div>
-  {{/if}}
   <div class="row mt-3">
     {{#if products.payload.length}}
 

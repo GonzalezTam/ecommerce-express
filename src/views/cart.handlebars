@@ -6,15 +6,18 @@
   <div class="collapse navbar-collapse justify-content-between" id="navbarTogglerDemo01">
     <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
       <a class="navbar-brand" href="#">🕹</a>
-      <li class="nav-item active">
+      <li class="nav-item">
         <a class="nav-link" href="/products">Products</a>
       </li>
       <li class="nav-item">
         <a class="nav-link" href="/profile">Profile</a>
       </li>
+      <li class="nav-item ml-2">
+        <a class="nav-link" id="chat-access" href="/chat">Chat 💬</a>
+      </li>
       <!-- Admin does not have access to cart -->
       {{#unless isAdmin}}
-      <li class="nav-item">
+      <li class="nav-item active">
         <a class="nav-link disabled" id="my-cart" href="#">🛒 (0)</a>
       </li>
       {{/unless}}
