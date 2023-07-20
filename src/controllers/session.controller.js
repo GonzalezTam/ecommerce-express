@@ -1,4 +1,5 @@
 import { sessionsService } from '../services/session.service.js';
+import { userDTO } from '../dto/user.dto.js';
 
 const getCurrent = async (req, res) => {
   const result = await sessionsService.getCurrent(req);
@@ -8,18 +9,19 @@ const getCurrent = async (req, res) => {
 const register = async (req, res) => res.redirect('/login');
 
 const login = async (req, res) => {
-  if (!req.user) {
-    return res.status(400).send({ status: 'error', message: 'Email or password incorrect' });
+  try {
+    if (!req.user) {
+      return res.status(400).send({ status: 'error', message: 'Email or password incorrect' });
+    }
+
+    const user = userDTO(req.user);
+    req.session.user = user;
+
+    res.status(200).send({ status: 200, message: 'Login successful' });
+  } catch (error) {
+    console.log(error);
+    return res.status(400).send({ status: 'error', message: error.message });
   }
-  req.session.user = {
-    firstName: req.user.firstName,
-    lastName: req.user.lastName,
-    email: req.user.email,
-    age: req.user.age,
-    cart: req.user.cart,
-    role: 'user'
-  };
-  res.status(200).send({ status: 200, message: 'Login successful' });
 };
 
 const logout = async (req, res) => {

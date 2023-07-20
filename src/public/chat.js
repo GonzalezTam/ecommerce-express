@@ -19,9 +19,7 @@ document.onreadystatechange = async () => {
 
 socket = io();
 socket.on('history', data => {
-  console.log('history', data);
-  messagesArray[data._id] = data;
-  console.log(messagesArray);
+  messagesArray[messagesArray.length] = data;
   let messageDiv = '';
   Object.values(messagesArray).forEach(m => {
     messageDiv += `<div class="container message" style=""><span class="mx-4 small" style="color:lightgrey">${m.date}</span><strong>[${m.user}]</strong>: ${m.message}</div>`;
