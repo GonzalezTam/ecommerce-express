@@ -1,7 +1,7 @@
 {
   "name": "backend-node",
   "version": "1.0.0",
-  "description": "Entrega 10 clase 13",
+  "description": "Entrega 10 clase 16",
   "main": "src/app.js",
   "type": "module",
   "scripts": {
@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@handlebars/allow-prototype-access": "^1.0.5",
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.2",
     "connect-mongo": "^5.0.0",
@@ -26,7 +27,8 @@
     "passport-github2": "^0.1.12",
     "passport-local": "^1.0.0",
     "socket.io": "^4.6.1",
-    "sweetalert2": "^11.7.18"
+    "sweetalert2": "^11.7.18",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "eslint": "^8.45.0",

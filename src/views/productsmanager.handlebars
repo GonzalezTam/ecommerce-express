@@ -21,7 +21,7 @@
       <!-- Admin does not have access to cart -->
       {{#unless isAdmin}}
       <li class="nav-item">
-        <a class="nav-link disabled" id="my-cart" href="#">🛒 (0)</a>
+        <a class="nav-link" id="my-cart" href="#">🛒 ({{userCartLength}})</a>
       </li>
       {{/unless}}
     </ul>

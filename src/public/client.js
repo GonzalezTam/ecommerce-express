@@ -2,15 +2,27 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 let productsArray = [];
+let userSession;
 let userCart;
 let socket;
 
 document.onreadystatechange = async () => {
-  const products = (location.pathname === '/productsmanager') ? '/products/manager' : '/products';
-  await fetch(`http://localhost:3000/api${products}?limit=all`)
+  const products = (location.pathname === '/productsmanager')
+    ? '/products/manager'
+    : '/products';
+  if (products) {
+    await fetch(`http://localhost:3000/api${products}?limit=all`)
+      .then(res => res.json())
+      .then(data => {
+        productsArray = data.products.payload;
+      })
+      .catch(err => console.log(err));
+  }
+
+  await fetch('http://localhost:3000/api/session/current')
     .then(res => res.json())
     .then(data => {
-      productsArray = data.products.payload;
+      if (data.status === 200) userSession = data.user;
     })
     .catch(err => console.log(err));
 };
@@ -34,7 +46,7 @@ const adminPanelButton = document.getElementById('adminPanel-button');
 document.addEventListener('click', function (e) {
   if (e.target.matches('.remove-product')) delete_product(e.target.dataset.id);
   if (e.target.matches('.edit-product')) edit_product(e.target.dataset.id);
-  if (userCart && userCart._id) {
+  if (userSession && userSession.cart) {
     if (e.target.matches('.add-to-cart')) update_cart(e.target.dataset.id);
   } else {
     if (e.target.matches('.add-to-cart')) create_cart(e.target.dataset.id);
@@ -44,6 +56,14 @@ document.addEventListener('click', function (e) {
     document.location.href = '/productsmanager';
   }
 }, false);
+
+// If cart is empty, link to cart is disabled (TODO: add empty cart page)
+if (cart && cart.innerHTML === '🛒 (0)') {
+  if (userSession && userSession.cart) {
+    cart.href = `/${userSession.cart}/purchase`;
+  }
+  cart.href = '#';
+}
 
 socket = io();
 socket.on('new_product', data => {
@@ -65,6 +85,7 @@ socket.on('cartCreated', data => {
   userCart = { _id: data._id, products: data.products };
   const userCartLength = userCart.products?.length || 0;
   cart.innerHTML = '🛒 (' + userCartLength + ')';
+  (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
 });
 socket.on('cartUpdated', data => {
   userCart = { _id: data._id, products: data.products };
@@ -73,6 +94,7 @@ socket.on('cartUpdated', data => {
     userCartLength += p.quantity;
   }
   cart.innerHTML = '🛒 (' + userCartLength + ')';
+  (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
 });
 
 async function delete_product (id) {
@@ -142,7 +164,7 @@ async function edit_product (id) {
 }
 
 async function create_cart (id) {
-  // console.log('first_in_cart', id);
+  console.log('Usuario no tiene un cart, creando nuevo cart');
   try {
     const body = {
       products: [
@@ -152,28 +174,39 @@ async function create_cart (id) {
         }
       ]
     };
-    const response = await fetch('http://localhost:3000/api/carts', {
+    await fetch('http://localhost:3000/api/carts', {
       method: 'post',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
+    }).then(async (response) => {
+      if (response.status === 200) {
+        const data = await response.json();
+        if (data) {
+          const userId = userSession._id;
+          const cartId = data.cartCreated._id;
+          const res = await udpate_user_cart(userId, cartId);
+          if (res.status === 200) {
+            userSession.cart = cartId;
+            socket = io();
+            socket.emit('cartCreated', data.cartCreated);
+          } else {
+            throw new Error(res.error);
+          }
+        }
+      } else if (response.status === 400) {
+        const data = await response.json();
+        console.error(data.error);
+      } else {
+        throw new Error('Unexpected response');
+      }
     });
-    if (response.status === 200) {
-      const data = await response.json();
-      socket = io();
-      socket.emit('cartCreated', data.cartCreated);
-    } else if (response.status === 400) {
-      const data = await response.json();
-      console.error(data.error);
-    } else {
-      throw new Error('Unexpected response');
-    }
   } catch (err) {
     console.error(`Error: ${err}`);
   }
 }
 
 async function update_cart (id) {
-  const cartId = userCart._id;
+  const cartId = userSession.cart;
   const productId = id;
   try {
     const response = await fetch(`http://localhost:3000/api/carts/${cartId}/products/${productId}`, {
@@ -190,6 +223,26 @@ async function update_cart (id) {
       console.error(data.error);
     } else {
       throw new Error('Unexpected response');
+    }
+  } catch (err) {
+    console.error(`Error: ${err}`);
+  }
+}
+
+async function udpate_user_cart (userId, cartId) {
+  try {
+    const response = await fetch(`http://localhost:3000/api/users/${userId}/cart/${cartId}`, {
+      method: 'put',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    if (response.status === 200) {
+      const data = await response.json();
+      return data;
+    } else if (response.status === 400) {
+      const data = await response.json();
+      return data;
+    } else {
+      throw new Error('Unexpected response updating user cart');
     }
   } catch (err) {
     console.error(`Error: ${err}`);

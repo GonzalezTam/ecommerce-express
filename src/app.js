@@ -3,16 +3,17 @@ import express from 'express';
 import session from 'express-session';
 import connectDB from './dao/MongoConnect.js';
 import MongoStore from 'connect-mongo';
-
 import passport from 'passport';
 import initializePassport from './config/passport.config.js';
 import dotEnvConfig from './config/env.config.js';
-
-import handlebars from 'express-handlebars';
 import { Server } from 'socket.io';
 
 import viewsRouter from './routes/views.router.js';
 import apiRouter from './routes/api.router.js';
+
+import Handlebars from 'handlebars';
+import handlebars from 'express-handlebars';
+import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
 
 const { PORT, SOCKET_PORT, MONGO_URI, MONGO_DB_SESSION, SECRET } = dotEnvConfig;
 
@@ -47,7 +48,12 @@ try {
   app.use('/api', apiRouter);
   app.use('/', viewsRouter);
 
-  app.engine('handlebars', handlebars.engine());
+  app.set('view engine', 'hbs');
+  app.engine('handlebars', handlebars.engine({
+    extname: 'handlebars',
+    defaultLayout: 'main',
+    handlebars: allowInsecurePrototypeAccess(Handlebars)
+  }));
   app.set('views', './src/views');
   app.set('view engine', 'handlebars');
 
@@ -80,6 +86,6 @@ try {
     });
   });
 } catch (error) {
-  // console.log(error)
+  // console.log(error);
   console.log('Server Error');
 }

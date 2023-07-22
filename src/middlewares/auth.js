@@ -17,6 +17,11 @@ export const auth = (req, res, next) => {
   return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
 };
 
+export const authUsersOnly = (req, res, next) => {
+  if (req.session.user?.role === 'user') return next();
+  return res.redirect('/');
+};
+
 // if user is logged in, redirect to profile.
 export const activeSession = (req, res, next) => {
   if (!req.session.user) return next();
@@ -84,6 +89,7 @@ export const passportGitHubCallback = passport.authenticate('github', { failureR
 
 export default {
   auth,
+  authUsersOnly,
   activeSession,
   loginValidations,
   registerValidations,

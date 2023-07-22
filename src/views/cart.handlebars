@@ -18,7 +18,7 @@
       <!-- Admin does not have access to cart -->
       {{#unless isAdmin}}
       <li class="nav-item active">
-        <a class="nav-link disabled" id="my-cart" href="#">🛒 (0)</a>
+        <a class="nav-link" id="my-cart" href="/{{cid}}/purchase">🛒 ({{userCartLength}})</a>
       </li>
       {{/unless}}
     </ul>
@@ -37,8 +37,8 @@
     <h1>Cart Products</h1>
   </div>
   <div class="row mt-3">
-    {{#if products.length}}
-    {{#each products}}
+    {{#if cart.length}}
+    {{#each cart}}
     <div class="card m-2 p-0" style="width: 17rem;">
       <img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
       <div class="card-body">
@@ -60,4 +60,5 @@
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
-<script src="client.js"></script>
+<script src="../client.js" type="module"></script>
+<script src="../session.js" type="module"></script>

@@ -1,7 +1,10 @@
+import { userDTO } from '../dto/user.dto.js';
+
 const getCurrent = async (req) => {
   let result;
-  if (req.session.user) {
-    result = { user: req.session.user, status: 200 };
+  if (req.user) {
+    const user = await userDTO(req.user);
+    result = { user, status: 200 };
     return result;
   }
   result = { user: {}, error: 'User not logged in', status: 401 };
