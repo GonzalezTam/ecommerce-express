@@ -1,6 +1,6 @@
 import productModel from '../dao/models/product.model.js';
 
-const getAllProducts = async (req) => {
+export const getAllProducts = async (req) => {
   try {
     const limit = req.query.limit;
     const page = req.query.page;

@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import dotEnvConfig from '../config/env.config.js';
 import { auth, authUsersOnly, activeSession } from '../middlewares/auth.js';
+import { generateMockProducts } from '../services/mocking.service.js';
+import { errorMessage } from '../services/errors.service.js';
+import { getAllProducts } from '../services/products.service.js';
 const viewsRouter = Router();
 
 const { PORT } = dotEnvConfig;
@@ -143,6 +146,24 @@ viewsRouter.get('/chat', auth, async (req, res) => {
     return res.render('chat', { user, isAdmin, messages: result, userCartLength });
   } else {
     return res.render('chat', { user, isAdmin, messages: result, userCartLength: 0 });
+  }
+});
+
+viewsRouter.get('/mockingproducts', auth, async (req, res, next) => {
+  try {
+    await generateMockProducts();
+    const products = await getAllProducts(req);
+    res.status(200).json({ products });
+  } catch (err) {
+    const errString = err.toString();
+    console.log(errString);
+    if (errString.includes('11000')) return res.status(400).json({ error: errorMessage.duplicatedKey });
+    if (errString.includes('ValidationError') && errString.includes('is required')) return res.status(400).json({ error: errorMessage.requiredFields });
+    if (errString.includes('CastError')) return res.status(400).json({ error: errorMessage.invalidType });
+    if (errString.includes('is more than maximum allowed value')) return res.status(400).json({ error: errorMessage.exceedsMaxValue });
+    if (errString.includes('is less than minimum allowed value')) return res.status(400).json({ error: errorMessage.exceedsMinValue });
+    if (errString.includes('Internal server error')) return res.status(500).json({ error: errorMessage.internalServerError });
+    return res.status(500).json({ errString });
   }
 });
 
