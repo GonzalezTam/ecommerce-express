@@ -69,17 +69,17 @@ socket = io();
 socket.on('new_product', data => {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  document.location.href = `/productsmanager?${urlParams}`;
+  if (document.location.pathname === '/productsmanager') document.location.href = `/productsmanager?${urlParams}`;
 });
 socket.on('update_product', data => {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  document.location.href = `/productsmanager?${urlParams}`;
+  if (document.location.pathname === '/productsmanager') document.location.href = `/productsmanager?${urlParams}`;
 });
 socket.on('delete_product', data => {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
-  document.location.href = `/productsmanager?${urlParams}`;
+  if (document.location.pathname === '/productsmanager') document.location.href = `/productsmanager?${urlParams}`;
 });
 socket.on('cartCreated', data => {
   userCart = { _id: data._id, products: data.products };
@@ -305,7 +305,7 @@ submitProduct?.addEventListener('click', async (e) => {
 
 updateProduct?.addEventListener('click', async (e) => {
   e.preventDefault();
-  if (!title.value || !category.value || !description.value || !price.value || !stock.value || !code.value) {
+  if (!title.value || !category.value || !description.value || !price.value || (!stock.value && stock.value !== 0) || !code.value) {
     Swal.fire(
       'Ups!',
       'All fields are required.',

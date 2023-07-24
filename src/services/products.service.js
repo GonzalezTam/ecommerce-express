@@ -165,7 +165,7 @@ const createProduct = async (req) => {
     const result = { error: 'ID must not be provided', status: 400 };
     return result;
   }
-  if (!req.body.title || !req.body.description || !req.body.price || !req.body.stock || !req.body.code || !req.body.category) {
+  if (!req.body.title || !req.body.description || !req.body.price || (!req.body.stock && req.body.stock !== 0) || !req.body.code || !req.body.category) {
     const result = { error: 'Missing parameters', status: 400 };
     return result;
   }
@@ -213,7 +213,7 @@ const updateProduct = async (req) => {
       title: req.body.title ? req.body.title : toUpdateProduct.title,
       description: req.body.description ? req.body.description : toUpdateProduct.description,
       price: req.body.price ? req.body.price : toUpdateProduct.price,
-      stock: req.body.stock ? req.body.stock : toUpdateProduct.stock,
+      stock: (req.body.stock || req.body.stock === 0) ? req.body.stock : toUpdateProduct.stock,
       code: req.body.code ? req.body.code : toUpdateProduct.code,
       status: req.body.status === undefined ? toUpdateProduct.status : req.body.status,
       category: req.body.category ? req.body.category : toUpdateProduct.category,
