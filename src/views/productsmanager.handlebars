@@ -82,7 +82,7 @@
     <h1>Products</h1>
   </div>
 
-  <table id="productsmanagerTable" class="table table-striped">
+  <table id="productsmanagerTable" class="table">
     <tr>
       <td><strong>Code</strong></td>
       <td><strong>Product</strong></td>
@@ -95,7 +95,7 @@
     </tr>
     {{#if products.payload.length}}
     {{#each products.payload }}
-    <tr>
+    <tr class="{{#unless this.stock}}text-danger{{/unless}}">
       <td>{{this.code}}</td>
       <td>{{this.title}}</td>
       <td>{{this.description}}</td>

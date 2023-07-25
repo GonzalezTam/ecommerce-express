@@ -56,7 +56,11 @@
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item">Price: ${{this.price}}</li>
+        {{#if this.stock}}
         <li class="list-group-item">Stock: {{this.stock}}</li>
+        {{else}}
+        <li class="list-group-item">Stock: <span class="text-danger">Out of stock</span></li>
+        {{/if}}
         <li class="list-group-item">Code: {{this.code}}</li>
         <li class="list-group-item">ID: {{this._id}}</li>
       </ul>
@@ -75,13 +79,17 @@
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item">Price: ${{this.price}}</li>
+        {{#if this.stock}}
         <li class="list-group-item">Stock: {{this.stock}}</li>
+        {{else}}
+        <li class="list-group-item">Stock: <span class="text-danger">Out of stock</span></li>
+        {{/if}}
         <li class="list-group-item">Code: {{this.code}}</li>
         <li class="list-group-item">ID: {{this._id}}</li>
       </ul>
       <ul class="card-footer m-0 row">
-        <button class="justify-content-center m-0 btn btn-secondary btn-sm add-to-cart" data-id={{this._id}}>Add to
-          🛒</button>
+        <button class="justify-content-center m-0 btn btn-secondary btn-sm add-to-cart {{#unless this.stock}}disabled{{/unless}}"
+          data-id="{{this._id}}">Add to cart</button>
       </ul>
     </div>
     {{/each}}
