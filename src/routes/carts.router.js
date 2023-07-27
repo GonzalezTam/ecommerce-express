@@ -1,70 +1,18 @@
 import { Router } from 'express';
+import cartsController from '../controllers/carts.controller.js';
 import cartModel from '../dao/models/cart.model.js';
 import productModel from '../dao/models/product.model.js';
 
 const cartsRouter = Router();
 
-cartsRouter.get('/', async (req, res) => {
-  const carts = await cartModel.find().lean().exec();
-  res.send({ carts });
-});
+cartsRouter.get('/', cartsController.getAllCarts);
+cartsRouter.get('/:cid', cartsController.getCartById);
+cartsRouter.get('/:cid/detail', cartsController.getCartDetailById);
+cartsRouter.put('/:cid', cartsController.updateCartById);
+cartsRouter.delete('/:cid', cartsController.deleteCartById);
+cartsRouter.post('/', cartsController.createCart);
 
-cartsRouter.get('/:cid', async (req, res) => {
-  const id = req.params.cid;
-  try {
-    const cart = await cartModel.findOne({ _id: id }).populate('products.productId').lean().exec();
-    if (cart) res.status(200).send({ cart }); else res.status(404).send({ 'Cart not found': id });
-  } catch (error) {
-    console.log(error);
-    res.status(404).send({ 'Cart not found': id });
-  }
-});
-
-cartsRouter.put('/:cid', async (req, res) => {
-  const id = req.params.cid;
-  const { products } = req.body;
-  if (!products) {
-    res.status(400).send({ error: 'No Products provided' });
-    return;
-  }
-  if (!Array.isArray(products)) {
-    res.status(400).send({ error: 'Products must be an array' });
-    return;
-  }
-  try {
-    const cart = await cartModel.findOne({ _id: id }).lean().exec();
-    await cartModel.updateOne({ _id: id }, { products }).lean().exec();
-    res.status(200).send({ updatedCart: cart });
-  } catch (error) {
-    res.status(404).send({ 'Cart not found': id });
-  }
-});
-
-cartsRouter.delete('/:cid', async (req, res) => {
-  const id = req.params.cid;
-  try {
-    const cart = await cartModel.findOne({ _id: id }).lean().exec();
-    await cartModel.deleteOne({ _id: id }).lean().exec();
-    res.status(200).send({ cartDeleted: cart });
-  } catch (error) {
-    res.status(404).send({ 'Cart not found': id });
-  }
-});
-
-cartsRouter.post('/', async (req, res) => {
-  const { products } = req.body;
-  if (!products) {
-    res.status(400).send({ error: 'No Products provided' });
-    return;
-  }
-  if (!Array.isArray(products)) {
-    res.status(400).send({ error: 'Products must be an array' });
-    return;
-  }
-  const cart = await cartModel.create({ products });
-  res.status(200).send({ cartCreated: cart });
-});
-
+// Todo: create a controller for this
 cartsRouter.post('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
@@ -98,6 +46,7 @@ cartsRouter.post('/:cid/products/:pid', async (req, res) => {
   }
 });
 
+// Todo: create a controller for this
 cartsRouter.put('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
@@ -128,6 +77,7 @@ cartsRouter.put('/:cid/products/:pid', async (req, res) => {
   }
 });
 
+// Todo: create a controller for this
 cartsRouter.delete('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;

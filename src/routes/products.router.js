@@ -8,6 +8,7 @@ productsRouter.get('/manager/', productsController.getAllProductsManager);
 productsRouter.get('/:id', productsController.getProductsById);
 productsRouter.post('/', productsController.createProduct);
 productsRouter.put('/:id', productsController.updateProduct);
+productsRouter.put('/purchase/:cid', productsController.updateProductsStockByOrder);
 productsRouter.delete('/:id', productsController.deleteProduct);
 
 export default productsRouter;

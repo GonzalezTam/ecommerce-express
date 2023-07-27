@@ -84,8 +84,10 @@ socket.on('delete_product', data => {
 socket.on('cartCreated', data => {
   userCart = { _id: data._id, products: data.products };
   const userCartLength = userCart.products?.length || 0;
-  cart.innerHTML = '🛒 (' + userCartLength + ')';
-  (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
+  if (userCart._id === userSession.cart) {
+    cart.innerHTML = '🛒 (' + userCartLength + ')';
+    (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
+  }
 });
 socket.on('cartUpdated', data => {
   userCart = { _id: data._id, products: data.products };
@@ -93,8 +95,10 @@ socket.on('cartUpdated', data => {
   for (const p of userCart.products) {
     userCartLength += p.quantity;
   }
-  cart.innerHTML = '🛒 (' + userCartLength + ')';
-  (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
+  if (userCart._id === userSession.cart) {
+    cart.innerHTML = '🛒 (' + userCartLength + ')';
+    (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
+  }
 });
 
 async function delete_product (id) {
@@ -164,7 +168,6 @@ async function edit_product (id) {
 }
 
 async function create_cart (id) {
-  console.log('Usuario no tiene un cart, creando nuevo cart');
   try {
     const body = {
       products: [

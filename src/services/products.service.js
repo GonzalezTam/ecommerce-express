@@ -1,4 +1,5 @@
 import productModel from '../dao/models/product.model.js';
+import { cartsService } from '../services/carts.service.js';
 
 const getAllProducts = async (req) => {
   try {
@@ -228,6 +229,62 @@ const updateProduct = async (req) => {
   }
 };
 
+// This function is used to update the stock of a product after a purchase
+const updateProductsStockByOrder = async (req, res) => {
+  const successfullyBought = [];
+  const notEnoughRequested = [];
+  const notFound = [];
+  try {
+    // get the cart detail
+    const orderDetail = await cartsService.getCheckoutDetail(req);
+    if (!orderDetail.result) return { status: 404, error: 'Cart not found' };
+
+    if (orderDetail.error) throw new Error(orderDetail.error);
+    const products = orderDetail.result?.cart?.products;
+
+    if (!products) throw new Error('No Products provided');
+    if (!Array.isArray(products)) throw new Error('Products must be an array');
+
+    // update the stock of each product regarding the quantity requested
+    const promises = products.map(async (p) => {
+      // check if the product exists and if there is enough stock
+      const product = await productModel.findOne({ _id: p._id }).lean().exec();
+      if (!product) { notFound.push(p); return; }
+      const quantityRequested = p.quantity;
+
+      // if there is not enough stock, add the product to the notEnoughWanted array
+      if (product.stock < quantityRequested) {
+        notEnoughRequested.push({ id: product._id, product: product.title, quantityRequested, stock: product.stock, price: product.price });
+        return;
+      }
+
+      // update the stock of the product in the database
+      const newStock = product.stock - quantityRequested;
+      const updateOne = await productModel.updateOne({ _id: p._id }, { stock: newStock });
+      if (updateOne) {
+        successfullyBought.push({ id: product._id, product: product.title, quantityBought: quantityRequested, price: product.price });
+        return updateOne;
+      }
+    });
+    // wait for all the updates to finish
+    await Promise.all(promises);
+
+    // return the result with stock or unavailability warnings
+    const result = {
+      operations: { successfullyBought, notEnoughRequested, notFound },
+      toCharge: successfullyBought.reduce((acc, curr) => acc + curr.price * curr.quantityBought, 0)
+    };
+    // if any product was updated (bought), return the result.
+    if (successfullyBought.length) return { status: 200, result };
+
+    // if no product was updated, return an error
+    return { status: 400, result, error: 'Not enough stock' };
+  } catch (error) {
+    const result = { status: 400, error: error.message };
+    return result;
+  }
+};
+
 const deleteProduct = async (req) => {
   const id = req.params.id;
   try {
@@ -246,5 +303,6 @@ export const productsService = {
   getProductsById,
   createProduct,
   updateProduct,
+  updateProductsStockByOrder,
   deleteProduct
 };

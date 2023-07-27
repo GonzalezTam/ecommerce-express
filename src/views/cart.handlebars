@@ -18,7 +18,7 @@
       <!-- Admin does not have access to cart -->
       {{#unless isAdmin}}
       <li class="nav-item active">
-        <a class="nav-link" id="my-cart" href="/{{cid}}/purchase">🛒 ({{userCartLength}})</a>
+        <a class="nav-link" id="my-cart" href="/{{cid}}/purchase" data-cart-id="{{cart._id}}">🛒 ({{userCartLength}})</a>
       </li>
       {{/unless}}
     </ul>
@@ -101,4 +101,5 @@
 
 <script src="/socket.io/socket.io.js"></script>
 <script src="../client.js" type="module"></script>
+<script src="../cart.js" type="module"></script>
 <script src="../session.js" type="module"></script>

@@ -28,6 +28,13 @@ export const activeSession = (req, res, next) => {
   return res.redirect('/profile');
 };
 
+// if user is not the owner of the cart, respond with 401.
+export const cartOwnership = async (req, res, next) => {
+  const cartId = req.params.cid;
+  if (req.user.cart === cartId) return next();
+  else res.status(401).send({ message: 'Unauthorized' });
+};
+
 export const registerValidations = async (req, res, next) => {
   const emailRegex = /\S+@\S+\.\S+/;
   const { email, password, password2, firstName, lastName, age } = req.body;
@@ -91,6 +98,7 @@ export default {
   auth,
   authUsersOnly,
   activeSession,
+  cartOwnership,
   loginValidations,
   registerValidations,
   createHash,

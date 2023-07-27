@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import dotEnvConfig from '../config/env.config.js';
-import { auth, authUsersOnly, activeSession } from '../middlewares/auth.js';
+import { auth, authUsersOnly, activeSession, cartOwnership } from '../middlewares/auth.js';
+import { cartsService } from '../services/carts.service.js';
 const viewsRouter = Router();
 
 const { PORT } = dotEnvConfig;
@@ -105,42 +106,23 @@ viewsRouter.get('/productsmanager', auth, async (req, res) => {
 // This route is for admin user only
 viewsRouter.get('/usersmanager', auth, async (req, res) => { });
 
-viewsRouter.get('/:cid/purchase', auth, authUsersOnly, async (req, res) => {
-  const cid = req.params.cid;
-  const cart = await fetch(`http://localhost:${PORT}/api/carts/${cid}`)
-    .then(res => res.json())
-    .then(data => {
-      return data.cart;
-    })
-    .catch(err => console.log(err));
-  if (!cart) return res.status(404).send({ 'Cart not found': cid });
+viewsRouter.get('/:cid/purchase', auth, authUsersOnly, cartOwnership, async (req, res) => {
+  try {
+    const cid = req.params.cid;
+    const result = await cartsService.getCheckoutDetail(req);
+    if (!result.result) return res.send({ status: 404, error: result.error });
+    const { cart, order, userCartLength } = result.result;
+    res.render('cart', { cart, order, userCartLength, cid });
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: error.message });
+  }
+});
 
-  // Cart
-  const { products } = cart;
-  const cartObj = {
-    ...cart,
-    products: products.map(p => {
-      return {
-        ...p.productId,
-        quantity: p.quantity,
-        subtotal: (p.productId.stock !== 0) ? p.quantity * p.productId.price : 0
-      };
-    }),
-    outOfStockFlag: products.some(p => p.productId.stock === 0)
-  };
-
-  // Order
-  const shippingPrice = 0; // hardcode shipping price
-  const subTotal = cartObj?.products?.reduce((acc, curr) => acc + curr.subtotal, 0);
-  const order = {
-    user: req.user._id,
-    shippingPrice: shippingPrice || 0,
-    subTotal: subTotal || 0,
-    total: subTotal + shippingPrice || 0
-  };
-
-  const userCartLength = products?.reduce((acc, curr) => acc + curr.quantity, 0) || 0;
-  res.render('cart', { cart: cartObj, order, userCartLength, cid });
+viewsRouter.get('/purchase/:status', auth, authUsersOnly, async (req, res) => {
+  const status = req.params.status;
+  if (status === 'success') res.render('purchase_success');
+  if (status === 'failed') res.render('purchase_failed');
 });
 
 viewsRouter.get('/chat', auth, async (req, res) => {

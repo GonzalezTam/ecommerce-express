@@ -25,6 +25,11 @@ const updateProduct = async (req, res) => {
   res.send(result);
 };
 
+const updateProductsStockByOrder = async (req, res) => {
+  const result = await productsService.updateProductsStockByOrder(req);
+  res.send(result);
+};
+
 const deleteProduct = async (req, res) => {
   const result = await productsService.deleteProduct(req);
   res.send(result);
@@ -36,6 +41,7 @@ const productsController = {
   getProductsById,
   createProduct,
   updateProduct,
+  updateProductsStockByOrder,
   deleteProduct
 };
 
