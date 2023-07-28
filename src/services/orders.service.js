@@ -1,5 +1,6 @@
 import ticketModel from '../dao/models/ticket.model.js';
 import { v4 as uuidv4 } from 'uuid';
+import sendGmail from '../mailing/emailSender.js';
 
 const getAllOrders = async (req) => {
   try {
@@ -17,6 +18,16 @@ const getOrderById = async (req) => {
     return { status: 200, order };
   } catch (error) {
     return { status: 404, error: 'Order not found' };
+  }
+};
+
+const getOrderByTicketCode = async (req) => {
+  const code = req.params.code;
+  try {
+    const order = await ticketModel.findOne({ code }).lean().exec();
+    return { status: 200, order };
+  } catch (error) {
+    return { status: 404, error: 'Ticket not found' };
   }
 };
 
@@ -48,8 +59,23 @@ const createOrder = async (req) => {
   }
 };
 
+const emailOrder = async (req) => {
+  const { user, body } = req;
+  const { orderStatus, order } = body;
+  const emailType = `order_${orderStatus}`;
+  const emailData = { user, order };
+  try {
+    await sendGmail(emailType, emailData);
+    return { status: 201, result: 'Email sent' };
+  } catch (error) {
+    return { status: 500, error: error.message };
+  }
+};
+
 export const ordersService = {
   getAllOrders,
   getOrderById,
-  createOrder
+  getOrderByTicketCode,
+  createOrder,
+  emailOrder
 };

@@ -41,6 +41,7 @@
     <div class="col-lg-9 col-md-8 col-sm-6 col-xs-12">
       <table id="cart-detail" class="col-8 table">
         <tr>
+          <td></td>
           <td><strong>Product</strong></td>
           <td><strong>x</strong></td>
           <td><strong>Stock</strong></td>
@@ -49,7 +50,8 @@
         </tr>
         {{#if cart.products.length}}
         {{#each cart.products }}
-        <tr class="{{#unless this.stock}}text-danger{{/unless}}">
+        <tr class="{{#if this.notEnoughStockWarning}}text-secondary{{/if}}{{#unless this.stock}}text-danger{{/unless}}">
+          <td class="text-center" style="width: 1em;">{{#if this.notEnoughStockWarning}}⚠{{/if}}</td>
           <td>{{this.title}}</td>
           <td>{{this.quantity}}</td>
           <td>{{this.stock}}</td>
@@ -67,8 +69,8 @@
 
       {{#if cart.outOfStockFlag}}
       <div class="alert alert-warning" role="alert">
-        <p class="m-auto">It seems that some products are out of stock.<br> Dont worry, you can still checkout and we wont charge you for
-          those products.</p>
+        <p class="m-auto">It seems that some products are out of stock or have insufficient stock. Please check the
+          table above. <br> If you decide to continue, the products with insufficient stock won't be added to the order.</p>
         </div>
       {{/if}}
     </div>

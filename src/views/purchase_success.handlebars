@@ -3,12 +3,28 @@
     <h2 class="alert-heading">Thank you for your purchase!</h2>
   </div>
   <div class="row justify-content-center mt-5 m-auto">
-    <div class="col-lg-6 col-md-8 col-sm-10 col-xs-10">
+    <div class="col-lg-6 col-md-10 col-sm-12 col-xs-10">
       <div class="alert alert-light" role="alert">
         <p>Your order has been placed and will be processed as soon as possible.</p>
-        <p class="mb-0">You will receive an email confirmation shortly.</p>
         <hr>
-        <p class="mb-0">Go to <a href="/">home</a> page.</p>
+        <div class="row d-flex justify-content-space-between mx-1" style="background-color: floralwhite">
+          <div class="col-12">
+            <p class="my-1">Order ID: <i>{{order.code}}</i></p>
+            {{#each order.items}}
+            <p class="my-2 mx-2">{{this.quantityBought}} <b>x</b> {{this.product}}</p>
+            {{/each}}
+            <p class="my-1"><b>Total: ${{order.amount}}</b></p>
+          </div>
+        </div>
+        <hr>
+        {{#if hasWarning}}
+        <div class="alert alert-warning" role="alert">
+          <p class="mb-0">Please note that some items were not available. We have removed them from your order and will
+            remain in your cart.</p>
+        </div>
+        {{/if}}
+        <p class="mx-1 mb-0">You will receive an email confirmation shortly.</p>
+        <p class="mx-1 mb-0">Go to <a href="/">home</a> page.</p>
       </div>
     </div>
   </div>

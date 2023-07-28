@@ -17,6 +17,9 @@ const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL;
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
 
+const GMAIL_USER = process.env.GMAIL_USER;
+const GMAIL_PASSWORD = process.env.GMAIL_PASSWORD;
+
 const dotEnvConfig = {
   PORT,
   SOCKET_PORT,
@@ -28,7 +31,9 @@ const dotEnvConfig = {
   GITHUB_CLIENT_SECRET,
   GITHUB_CALLBACK_URL,
   ADMIN_EMAIL,
-  ADMIN_PASSWORD
+  ADMIN_PASSWORD,
+  GMAIL_USER,
+  GMAIL_PASSWORD
 };
 
 // Export module

@@ -4,6 +4,7 @@ const cartId = document.getElementById('my-cart').getAttribute('data-cart-id');
 
 checkoutButton.addEventListener('click', function (e) {
   if (cartId) checkProductAvailability(cartId);
+  checkoutButton.disabled = true;
 }, false);
 
 const checkProductAvailability = async (cartId) => {
@@ -22,6 +23,7 @@ const checkProductAvailability = async (cartId) => {
           title: 'Oops...',
           html: '<p>Cannot checkout, products not available. <br> Please remove them from your cart and try again.</p>'
         });
+        checkoutButton.disabled = false;
         return;
       }
       if (data.result) {
@@ -55,7 +57,12 @@ const submitOrder = async (order) => {
   })
     .then(res => res.json())
     .then(data => {
-      if (data.error) document.location.href = '/purchase/failed';
-      if (data.result) document.location.href = '/purchase/success';
+      if (data.status === 201) {
+        const ticketCode = data.result.ticket.code;
+        const warning = order.operations.notEnoughRequested.length;
+        document.location.href = `/purchase/${ticketCode}?warning=${warning}`;
+      } else {
+        document.location.href = '/purchase/error';
+      }
     });
 };

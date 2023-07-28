@@ -48,21 +48,21 @@
     <!-- Admin view -->
     {{#if isAdmin}}
     {{#each products.payload}}
-    <div class="card m-2 p-0" style="width: 17rem;">
+    <div class="card m-2 p-0" style="width: 16rem;">
       <img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
       <div class="card-body">
-        <h5 class="card-title">{{this.title}}</h5>
-        <p class="card-text">{{this.description}}</p>
+        <h5 class="card-title small">{{this.title}}</h5>
+        <p class="card-text small">{{this.description}}</p>
       </div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">Price: ${{this.price}}</li>
+        <li class="list-group-item small">Price: ${{this.price}}</li>
         {{#if this.stock}}
-        <li class="list-group-item">Stock: {{this.stock}}</li>
+        <li class="list-group-item small">Stock: {{this.stock}}</li>
         {{else}}
-        <li class="list-group-item">Stock: <span class="text-danger">Out of stock</span></li>
+        <li class="list-group-item small">Stock: <span class="text-danger">Out of stock</span></li>
         {{/if}}
-        <li class="list-group-item">Code: {{this.code}}</li>
-        <li class="list-group-item">ID: {{this._id}}</li>
+        <li class="list-group-item small">Code: {{this.code}}</li>
+        <li class="list-group-item small">ID: {{this._id}}</li>
       </ul>
     </div>
     {{/each}}
@@ -71,21 +71,21 @@
     <!-- User view -->
     {{#unless isAdmin}}
     {{#each products.payload}}
-    <div class="card m-2 p-0" style="width: 17rem;">
+    <div class="card m-2 p-0" style="width: 16rem;">
       <img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
       <div class="card-body">
-        <h5 class="card-title">{{this.title}}</h5>
-        <p class="card-text">{{this.description}}</p>
+        <h5 class="card-title small">{{this.title}}</h5>
+        <p class="card-text small">{{this.description}}</p>
       </div>
       <ul class="list-group list-group-flush">
-        <li class="list-group-item">Price: ${{this.price}}</li>
+        <li class="list-group-item small">Price: ${{this.price}}</li>
         {{#if this.stock}}
-        <li class="list-group-item">Stock: {{this.stock}}</li>
+        <li class="list-group-item small">Stock: {{this.stock}}</li>
         {{else}}
-        <li class="list-group-item">Stock: <span class="text-danger">Out of stock</span></li>
+        <li class="list-group-item small">Stock: <span class="text-danger">Out of stock</span></li>
         {{/if}}
-        <li class="list-group-item">Code: {{this.code}}</li>
-        <li class="list-group-item">ID: {{this._id}}</li>
+        <li class="list-group-item small">Code: {{this.code}}</li>
+        <li class="list-group-item small">ID: {{this._id}}</li>
       </ul>
       <ul class="card-footer m-0 row">
         <button class="justify-content-center m-0 btn btn-secondary btn-sm add-to-cart {{#unless this.stock}}disabled{{/unless}}"

@@ -119,10 +119,23 @@ viewsRouter.get('/:cid/purchase', auth, authUsersOnly, cartOwnership, async (req
   }
 });
 
-viewsRouter.get('/purchase/:status', auth, authUsersOnly, async (req, res) => {
-  const status = req.params.status;
-  if (status === 'success') res.render('purchase_success');
-  if (status === 'failed') res.render('purchase_failed');
+viewsRouter.get('/purchase/:ticketCode', auth, authUsersOnly, async (req, res) => {
+  const ticketCode = req.params.ticketCode;
+  const hasWarning = req.query.warning;
+  try {
+    if (ticketCode === 'error') res.render('purchase_failed');
+    await fetch(`http://localhost:${PORT}/api/orders/ticket/${ticketCode}`)
+      .then(res => res.json())
+      .then(data => {
+        const order = data.order;
+        if (!order) return res.send({ status: 404, error: 'Order not found' });
+        res.render('purchase_success', { order, hasWarning });
+      })
+      .catch(err => console.log(err));
+  } catch (error) {
+    console.log(error);
+    res.status(500).send({ error: error.message });
+  }
 });
 
 viewsRouter.get('/chat', auth, async (req, res) => {
