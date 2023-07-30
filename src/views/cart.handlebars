@@ -1,0 +1,107 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01"
+    aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-between" id="navbarTogglerDemo01">
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <a class="navbar-brand" href="#">🕹</a>
+      <li class="nav-item">
+        <a class="nav-link" href="/products">Products</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/profile">Profile</a>
+      </li>
+      <li class="nav-item ml-2">
+        <a class="nav-link" id="chat-access" href="/chat">Chat 💬</a>
+      </li>
+      <!-- Admin does not have access to cart -->
+      {{#unless isAdmin}}
+      <li class="nav-item active">
+        <a class="nav-link" id="my-cart" href="/{{cid}}/purchase" data-cart-id="{{cart._id}}">🛒 ({{userCartLength}})</a>
+      </li>
+      {{/unless}}
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <!-- Admin has access to admin panel -->
+      {{#if isAdmin}}
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="adminPanel-button">⚙</button>
+      {{/if}}
+      <button class="btn btn-sm btn-danger my-2 my-sm-0" id="logout-button">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container">
+  <div class="row mt-5">
+    <h1>Cart Products</h1>
+  </div>
+  <div class="row mt-5">
+
+    <div class="col-lg-9 col-md-8 col-sm-6 col-xs-12">
+      <table id="cart-detail" class="col-8 table">
+        <tr>
+          <td></td>
+          <td><strong>Product</strong></td>
+          <td><strong>x</strong></td>
+          <td><strong>Stock</strong></td>
+          <td><strong>Price</strong></td>
+          <td><strong>Subtotal</strong></td>
+        </tr>
+        {{#if cart.products.length}}
+        {{#each cart.products }}
+        <tr class="{{#if this.notEnoughStockWarning}}text-secondary{{/if}}{{#unless this.stock}}text-danger{{/unless}}">
+          <td class="text-center" style="width: 1em;">{{#if this.notEnoughStockWarning}}⚠{{/if}}</td>
+          <td>{{this.title}}</td>
+          <td>{{this.quantity}}</td>
+          <td>{{this.stock}}</td>
+          <td>{{this.price}}</td>
+          <td>{{this.subtotal}}</td>
+        </tr>
+        {{/each}}
+        <!-- If no products -->
+        {{else}}
+        <tr>
+          <td colspan="8" class="text-center">No products available</td>
+        </tr>
+        {{/if}}
+      </table>
+
+      {{#if cart.outOfStockFlag}}
+      <div class="alert alert-warning" role="alert">
+        <p class="m-auto">It seems that some products are out of stock or have insufficient stock. Please check the
+          table above. <br> If you decide to continue, the products with insufficient stock won't be added to the order.</p>
+        </div>
+      {{/if}}
+    </div>
+
+    <div id="order-summary" class="col-lg-3 col-md-4 col-sm-6 col-xs-12">
+      <h5 class="mt-2 mx-2">Order Summary</h5>
+      <div class="col-12 mt-2">
+        <table class="table table-borderless mb-2">
+          <tr>
+            <td id="order-subtotal">Subtotal</td>
+            <td>${{order.subTotal}}</td>
+          </tr>
+          <tr>
+            <td id="order-shipping">Shipping</td>
+            <td>${{order.shippingPrice}}</td>
+          </tr>
+          <tr class="border-top bg-light">
+            <td id="order-total"><b>Total</b></td>
+            <td><b>${{order.total}}</b></td>
+          </tr>
+        </table>
+        <div class="col-12 d-inline-grid">
+          <button id="order-checkout-button" class="btn btn-success btn-sm btn-block">Checkout</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="../client.js" type="module"></script>
+<script src="../cart.js" type="module"></script>
+<script src="../session.js" type="module"></script>

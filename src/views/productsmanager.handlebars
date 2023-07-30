@@ -1,0 +1,144 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01"
+    aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-between" id="navbarTogglerDemo01">
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <a class="navbar-brand" href="#">🕹</a>
+      <li class="nav-item">
+        <a class="nav-link" href="/products">Products</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/profile">Profile</a>
+      </li>
+      <li class="nav-item ml-2">
+        <a class="nav-link" id="chat-access" href="/chat">Chat 💬</a>
+      </li>
+      {{!--<li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>--}}
+      <!-- Admin does not have access to cart -->
+      {{#unless isAdmin}}
+      <li class="nav-item">
+        <a class="nav-link" id="my-cart" href="#">🛒 ({{userCartLength}})</a>
+      </li>
+      {{/unless}}
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <!-- Admin has access to admin panel -->
+      {{#if isAdmin}}
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="adminPanel-button">⚙</button>
+      {{/if}}
+      <button class="btn btn-sm btn-danger my-2 my-sm-0" id="logout-button">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container" id="manager-container">
+  <div class="row mt-4">
+    <h1 id="manager-title">Add New Product</h1>
+  </div>
+  <div class="row g-3 mt-2" id="manager-sub-container">
+    <div class="row">
+      <div class="col-4">
+        <label class="form-label" for="title">Title</label>
+        <input class="form-control" type="text" name="title" id="title" placeholder="Product" required>
+      </div>
+      <div class="col-4">
+        <label class="form-label" for="category">Category</label>
+        <input class="form-control" type="text" name="category" id="category" placeholder="Category" required>
+      </div>
+    </div>
+    <div class="row mt-2">
+      <div class="col-3">
+        <label class="form-label" for="price">Price</label>
+        <input class="form-control" type="number" name="price" id="price" placeholder="100" required>
+      </div>
+      <div class="col-2">
+        <label class="form-label" for="stock">Stock</label>
+        <input class="form-control" type="number" name="stock" id="stock" placeholder="5" required>
+      </div>
+      <div class="col-3">
+        <label class="form-label" for="code">Code</label>
+        <input class="form-control" type="text" name="code" id="code" placeholder="xxx-1" required>
+      </div>
+    </div>
+    <div class="row mt-2">
+      <div class="col-8">
+        <label class="form-label" for="description">Description</label>
+        <input class="form-control" type="text" name="description" id="description"
+          placeholder="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt."
+          required>
+      </div>
+    </div>
+    <div class="col-12 mx-1">
+      <button id="submitProduct" class="btn btn-primary btn-sm">Add New</button>
+      <button id="updateProduct" class="btn btn-warning btn-sm" disabled>Update</button>
+    </div>
+  </div>
+
+  <div class="row mt-4 mb-2">
+    <h1>Products</h1>
+  </div>
+
+  <table id="productsmanagerTable" class="table">
+    <tr>
+      <td><strong>Code</strong></td>
+      <td><strong>Product</strong></td>
+      <td><strong>Description</strong></td>
+      <td><strong>Category</strong></td>
+      <td><strong>Price</strong></td>
+      <td><strong>Stock</strong></td>
+      <td class="text-center"><strong>Edit</strong></td>
+      <td class="text-center"><strong>Remove</strong></td>
+    </tr>
+    {{#if products.payload.length}}
+    {{#each products.payload }}
+    <tr class="{{#unless this.stock}}text-danger{{/unless}}">
+      <td>{{this.code}}</td>
+      <td>{{this.title}}</td>
+      <td>{{this.description}}</td>
+      <td>{{this.category}}</td>
+      <td>{{this.price}}</td>
+      <td>{{this.stock}}</td>
+      <td class="text-center">
+        <button data-id={{this._id}} type="button" class="edit-product btn btn-warning btn-sm">✍🏻</button>
+      </td>
+      <td class="text-center">
+        <button data-id={{this._id}} type="button" class="remove-product btn btn-danger btn-sm">❌</button>
+      </td>
+    </tr>
+    {{/each}}
+    <!-- If no products -->
+    {{else}}
+    <tr>
+      <td colspan="8" class="text-center">No products found</td>
+    </tr>
+    {{/if}}
+  </table>
+
+  {{!-- Pagination --}}
+  <nav aria-label="Products pagination">
+    <ul class="pagination">
+      {{#if products.hasPrevPage}}
+      <li class="page-item">
+        <a class="page-link" href="{{products.prevLink}}" tabindex="-1">Previous</a>
+      </li>
+      {{/if}}
+      {{#each products.loopedPages}}
+      <li class="page-item">
+        <a class="page-link" href="/productsmanager?page={{this.page}}" data-page="{{this}}">{{this.page}}</a>
+      </li>
+      {{/each}}
+      {{#if products.hasNextPage}}
+      <li class="page-item">
+        <a class="page-link" href="{{products.nextLink}}">Next</a>
+      </li>
+      {{/if}}
+    </ul>
+  </nav>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+  <script src="session.js"></script>
