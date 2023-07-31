@@ -1,8 +1,13 @@
 import dotenv from 'dotenv';
+import mongoConnection from '../dao/MongoConnect.js';
+import commander from '../utils/commander/commander.js';
+
+const { mode } = commander.opts();
 
 // Load env vars
 dotenv.config();
 
+const ENVIRONMENT = mode;
 const PORT = process.env.PORT || 3000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI;
@@ -21,6 +26,7 @@ const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_PASSWORD = process.env.GMAIL_PASSWORD;
 
 const dotEnvConfig = {
+  ENVIRONMENT,
   PORT,
   SOCKET_PORT,
   MONGO_URI,
@@ -33,7 +39,8 @@ const dotEnvConfig = {
   ADMIN_EMAIL,
   ADMIN_PASSWORD,
   GMAIL_USER,
-  GMAIL_PASSWORD
+  GMAIL_PASSWORD,
+  DB_CONNECT: async () => await mongoConnection(MONGO_URI)
 };
 
 // Export module

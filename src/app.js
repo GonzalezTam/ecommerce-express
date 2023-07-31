@@ -1,7 +1,8 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import session from 'express-session';
-import connectDB from './dao/MongoConnect.js';
+import loggerMiddleware from './middlewares/logger.js';
+import log from './utils/logger/logger.js';
 import MongoStore from 'connect-mongo';
 import passport from 'passport';
 import initializePassport from './config/passport.config.js';
@@ -15,14 +16,14 @@ import Handlebars from 'handlebars';
 import handlebars from 'express-handlebars';
 import { allowInsecurePrototypeAccess } from '@handlebars/allow-prototype-access';
 
-const { PORT, SOCKET_PORT, MONGO_URI, MONGO_DB_SESSION, SECRET } = dotEnvConfig;
+const { PORT, SOCKET_PORT, MONGO_URI, MONGO_DB_SESSION, SECRET, DB_CONNECT } = dotEnvConfig;
 
 const app = express();
 
 try {
-  connectDB(MONGO_URI);
-  const httpServer = app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
-
+  DB_CONNECT();
+  const httpServer = app.listen(PORT, () => log.info(`Server is running on port ${PORT}`));
+  app.use(loggerMiddleware);
   app.use(express.json());
   app.use(express.static('./src/public'));
   app.use(bodyParser.urlencoded({ extended: true }));
@@ -86,6 +87,5 @@ try {
     });
   });
 } catch (error) {
-  // console.log(error);
-  console.log('Server Error');
+  log.error(`Failed to start server: ${error.message}`);
 }

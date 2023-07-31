@@ -165,4 +165,15 @@ viewsRouter.get('/chat', auth, async (req, res) => {
   }
 });
 
+viewsRouter.get('/loggerTest', (req, res) => {
+  req.log.debug(`[${req.method} ${req.originalUrl}] status: ${res.statusCode}` + ' - debug log');
+  req.log.info(`[${req.method} ${req.originalUrl}] status: ${res.statusCode}` + ' - info log');
+  req.log.http(`[${req.method} ${req.originalUrl}] status: ${res.statusCode}` + ' - http log');
+  req.log.notice(`[${req.method} ${req.originalUrl}] status: ${res.statusCode}` + ' - notice log');
+  req.log.warn(`[${req.method} ${req.originalUrl}] status: ${res.statusCode}` + ' - warn log');
+  req.log.error(`[${req.method} ${req.originalUrl}] status: ${res.statusCode}` + ' - error log');
+  req.log.fatal(`[${req.method} ${req.originalUrl}] status: ${res.statusCode}` + ' - fatal log');
+  res.status(200).send({ message: 'Logger messages sent to console' });
+});
+
 export default viewsRouter;

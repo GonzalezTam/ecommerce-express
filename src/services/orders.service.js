@@ -1,6 +1,6 @@
 import ticketModel from '../dao/models/ticket.model.js';
 import { v4 as uuidv4 } from 'uuid';
-import sendGmail from '../mailing/emailSender.js';
+import { emailSender } from '../utils/mailing/emailSender.js';
 
 const getAllOrders = async (req) => {
   try {
@@ -65,7 +65,7 @@ const emailOrder = async (req) => {
   const emailType = `order_${orderStatus}`;
   const emailData = { user, order };
   try {
-    await sendGmail(emailType, emailData);
+    await emailSender(emailType, emailData);
     return { status: 201, result: 'Email sent' };
   } catch (error) {
     return { status: 500, error: error.message };

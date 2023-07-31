@@ -1,6 +1,6 @@
 import nodemailer from 'nodemailer';
 import Mailgen from 'mailgen';
-import dotEnvConfig from '../config/env.config.js';
+import dotEnvConfig from '../../config/env.config.js';
 
 const { GMAIL_USER, GMAIL_PASSWORD } = dotEnvConfig;
 
@@ -64,7 +64,7 @@ const parseEmailData = async (type, data) => {
   return { subject, template };
 };
 
-const sendGmail = async (type, data) => {
+export const emailSender = async (type, data) => {
   try {
     const { subject, template } = await parseEmailData(type, data);
     const htmlTemplate = MailGenerator.generate(template);
@@ -79,5 +79,3 @@ const sendGmail = async (type, data) => {
     console.error(error);
   }
 };
-
-export default sendGmail;
