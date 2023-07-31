@@ -16,10 +16,10 @@ const customWinstonOptions = {
 
   colors: {
     debug: 'white bold',
-    http: 'blue bold',
-    notice: 'cyan bold',
-    info: 'green bold',
-    warn: 'yellow bold',
+    http: 'blue',
+    notice: 'cyan',
+    info: 'green',
+    warn: 'yellow',
     error: 'red bold',
     fatal: 'magenta bold'
   }

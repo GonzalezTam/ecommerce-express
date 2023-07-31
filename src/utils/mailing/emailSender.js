@@ -76,6 +76,6 @@ export const emailSender = async (type, data) => {
     };
     await transporter.sendMail(mailOptions);
   } catch (error) {
-    console.error(error);
+    return error;
   }
 };

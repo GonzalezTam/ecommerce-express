@@ -7,6 +7,7 @@ const getMessages = async (req) => {
     messages = messages.reverse();
     return { status: 200, messages };
   } catch (error) {
+    req.log.error('[chat-getMessages] could not get chat messages');
     return { status: 500, error: error.message };
   }
 };
@@ -19,8 +20,10 @@ const postMessage = async (req) => {
       date: new Date()
     };
     const newMessage = await messageModel.create(message);
+    req.log.info(`[chat-postMessage] ${message.user} posted a message`);
     return { status: 201, newMessage };
   } catch (error) {
+    req.log.error('[chat-postMessage] error while saving message');
     return { status: 500, error: error.message };
   }
 };
