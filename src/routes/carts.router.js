@@ -32,17 +32,17 @@ cartsRouter.post('/:cid/products/:pid', async (req, res) => {
     const productInCart = Object.values(cart.products).some(product => product.productId === productId);
 
     if (!productInCart) {
-      // console.log('Adding new product to cart');
       const updatedCart = await cartModel.findOneAndUpdate({ _id: cartId }, { $push: { products: { productId, quantity: quantity + 1 } } }).lean().exec();
+      req.log.info(`[carts-addProductToCart] product ${productId} added to cart ${cartId} successfully`);
       res.status(200).send({ updatedCart });
     } else {
-      // console.log('Product already in cart, updating quantity');
       const updatedCart = await cartModel.updateOne({ _id: cartId, 'products.productId': productId }, { $inc: { 'products.$.quantity': 1 } }).lean().exec();
+      req.log.info(`[carts-addProductToCart] product ${productId} quantity updated in cart ${cartId} successfully`);
       res.status(200).send({ updatedCart });
     }
   } catch (error) {
-    console.log(error);
-    res.status(400).send({ 'Error adding product to cart': error.message });
+    req.log.error(`[carts-addProductToCart] ${error.message}`);
+    res.status(400).send({ error: error.message });
   }
 });
 
@@ -60,6 +60,7 @@ cartsRouter.put('/:cid/products/:pid', async (req, res) => {
     return;
   }
   if (!req.body.quantity || isNaN(req.body.quantity)) {
+    req.log.error(`[carts-updateProductQuantity] quantity ${req.body.quantity} is not a number`);
     res.status(400).send({ error: 'Quantity is not a number' });
     return;
   }
@@ -67,13 +68,16 @@ cartsRouter.put('/:cid/products/:pid', async (req, res) => {
     const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
     const productInCart = Object.values(cart.products).some(product => product.productId === productId);
     if (!productInCart) {
+      req.log.error(`[carts-updateProductQuantity] product ${productId} not in cart ${cartId}`);
       res.status(404).send({ error: 'Product not in cart' });
     } else {
       const updatedCart = await cartModel.updateOne({ _id: cartId, 'products.productId': productId }, { $set: { 'products.$.quantity': quantity } }).lean().exec();
+      req.log.info(`[carts-updateProductQuantity] product ${productId} quantity updated in cart ${cartId} successfully`);
       res.status(200).send({ updatedCart });
     }
   } catch (error) {
-    res.status(400).send({ 'Error updating product quantity': error.message });
+    req.log.error(`[carts-updateProductQuantity] ${error.message}`);
+    res.status(400).send({ error: error.message });
   }
 });
 
@@ -85,19 +89,22 @@ cartsRouter.delete('/:cid/products/:pid', async (req, res) => {
     const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
     const productInCart = Object.values(cart.products).find(product => product.productId === productId);
     if (!productInCart) {
+      req.log.error(`[carts-removeProductFromCart] product ${productId} not in cart ${cartId}`);
       res.status(404).send({ error: 'Product not in cart' });
     } else {
       if (productInCart.quantity === 1) { // if quantity is 1, remove product from cart
         const updatedCart = await cartModel.updateOne({ _id: cartId }, { $pull: { products: { productId } } }).lean().exec();
+        req.log.info(`[carts-removeProductFromCart] product ${productId} removed from cart ${cartId} successfully`);
         res.status(200).send({ productRemoved: updatedCart });
       } else { // if quantity is greater than 1, decrement quantity
         const updatedCart = await cartModel.updateOne({ _id: cartId, 'products.productId': productId }, { $inc: { 'products.$.quantity': -1 } }).lean().exec();
+        req.log.info(`[carts-removeProductFromCart] product ${productId} quantity updated in cart ${cartId} successfully`);
         res.status(200).send({ productRemoved: updatedCart });
       }
     }
   } catch (error) {
-    console.log(error);
-    res.status(400).send({ 'Error removing product from cart': `Could not remove product ${productId} from cart ${cartId}` });
+    req.log.error(`[carts-removeProductFromCart] ${error.message}`);
+    res.status(400).send({ error: `Could not remove product ${productId} from cart ${cartId}` });
   }
 });
 

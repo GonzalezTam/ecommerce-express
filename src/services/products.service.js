@@ -53,7 +53,7 @@ const getAllProducts = async (req) => {
       loopedPages
     };
     return resObj;
-  } catch {
+  } catch (error) {
     const resObj = {
       status: 'error',
       message: 'There was an error while querying the database',
@@ -69,6 +69,7 @@ const getAllProducts = async (req) => {
       count: null,
       totalCount: null
     };
+    req.log.error(`[products-getAllProducts] ${error.message}`);
     return resObj;
   }
 };
@@ -125,7 +126,7 @@ const getAllProductsManager = async (req) => {
       loopedPages
     };
     return resObj;
-  } catch {
+  } catch (error) {
     const resObj = {
       status: 'error',
       message: 'There was an error while querying the database',
@@ -141,6 +142,7 @@ const getAllProductsManager = async (req) => {
       count: null,
       totalCount: null
     };
+    req.log.error(`[products-getAllProductsManager] ${error.message}`);
     return resObj;
   }
 };
@@ -148,6 +150,7 @@ const getAllProductsManager = async (req) => {
 const getProductsById = async (req) => {
   const id = req.params.id;
   if (!id) {
+    req.log.error('[products-getProductsById] ID not provided');
     const result = { error: 'Invalid ID', status: 400 };
     return result;
   }
@@ -157,6 +160,7 @@ const getProductsById = async (req) => {
     return result;
   } catch (error) {
     const result = { error: 'Product not found', status: 404 };
+    req.log.error(`[products-getProductsById] ${error.message}`);
     return result;
   }
 };
@@ -164,14 +168,17 @@ const getProductsById = async (req) => {
 const createProduct = async (req) => {
   if (req.body.id || req.body._id) {
     const result = { error: 'ID must not be provided', status: 400 };
+    req.log.error('[products-createProduct] ID provided');
     return result;
   }
   if (!req.body.title || !req.body.description || !req.body.price || (!req.body.stock && req.body.stock !== 0) || !req.body.code || !req.body.category) {
     const result = { error: 'Missing parameters', status: 400 };
+    req.log.error('[products-createProduct] Missing parameters');
     return result;
   }
   if (typeof req.body.title !== 'string' || typeof req.body.description !== 'string' || typeof req.body.code !== 'string' || typeof req.body.price !== 'number' || (req.body.status && typeof req.body.status !== 'boolean') || typeof req.body.stock !== 'number' || typeof req.body.category !== 'string' || (req.body.thumbnails && typeof req.body.thumbnails !== 'object')) {
     const result = { error: 'Invalid parameters', status: 400 };
+    req.log.error('[products-createProduct] Invalid parameters');
     return result;
   }
 
@@ -189,9 +196,11 @@ const createProduct = async (req) => {
   try {
     const newProduct = await productModel.create(product);
     const result = { product: newProduct, status: 201 };
+    req.log.info('[products-createProduct] product created successfully');
     return result;
   } catch (error) {
     const result = { error: 'There was an error while creating the product', status: 400 };
+    req.log.error(`[products-createProduct] ${error.message}`);
     return result;
   }
 };
@@ -202,10 +211,12 @@ const updateProduct = async (req) => {
     const toUpdateProduct = await productModel.findOne({ _id: id }).lean().exec();
     if (req.body.id) {
       const result = { error: 'ID must not be provided', status: 400 };
+      req.log.error('[products-updateProduct] ID provided');
       return result;
     }
     if ((req.body.title && typeof req.body.title !== 'string') || (req.body.description && typeof req.body.description !== 'string') || (req.body.code && typeof req.body.code !== 'string') || (req.body.price && typeof req.body.price !== 'number') || (req.body.status && typeof req.body.status !== 'boolean') || (req.body.stock && typeof req.body.stock !== 'number') || (req.body.category && typeof req.body.category !== 'string') || (req.body.thumbnails && typeof req.body.thumbnails !== 'object')) {
       const result = { error: 'Invalid parameters', status: 400 };
+      req.log.error('[products-updateProduct] Invalid parameters');
       return result;
     }
 
@@ -222,9 +233,11 @@ const updateProduct = async (req) => {
     };
     const updatedProduct = await productModel.updateOne({ _id: id }, product);
     const result = { product: updatedProduct, status: 200 };
+    req.log.info('[products-updateProduct] product updated successfully');
     return result;
   } catch (error) {
     const result = { error: 'Product not found', status: 404 };
+    req.log.error(`[products-updateProduct] ${error.message}`);
     return result;
   }
 };
@@ -275,12 +288,17 @@ const updateProductsStockByOrder = async (req, res) => {
       toCharge: successfullyBought.reduce((acc, curr) => acc + curr.price * curr.quantityBought, 0)
     };
     // if any product was updated (bought), return the result.
-    if (successfullyBought.length) return { status: 200, result };
+    if (successfullyBought.length) {
+      req.log.info('[products-updateProductsStockByOrder] Successfully bought');
+      return { status: 200, result };
+    }
 
     // if no product was updated, return an error
+    req.log.error('[products-updateProductsStockByOrder] Not enough stock');
     return { status: 400, result, error: 'Not enough stock' };
   } catch (error) {
     const result = { status: 400, error: error.message };
+    req.log.error(`[products-updateProductsStockByOrder] ${error.message}`);
     return result;
   }
 };
@@ -290,9 +308,11 @@ const deleteProduct = async (req) => {
   try {
     const deletedProduct = await productModel.deleteOne({ _id: id });
     const result = { deletedProduct: { ...deletedProduct, _id: id }, status: 200 };
+    req.log.info('[products-deleteProduct] product deleted successfully');
     return result;
   } catch (error) {
     const result = { error: 'Product not found', status: 404 };
+    req.log.error(`[products-deleteProduct] ${error.message}`);
     return result;
   }
 };

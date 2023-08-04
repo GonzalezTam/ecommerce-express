@@ -45,6 +45,7 @@ const createOrder = async (req, res) => {
     }
     return res.status(result.status).send(result);
   } catch (error) {
+    req.log.error(`Error creating order: ${error.message}`);
     return res.status(500).send({ error: error.message });
   }
 };

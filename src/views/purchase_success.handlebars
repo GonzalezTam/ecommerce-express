@@ -9,11 +9,11 @@
         <hr>
         <div class="row d-flex justify-content-space-between mx-1" style="background-color: floralwhite">
           <div class="col-12">
-            <p class="my-1">Order ID: <i>{{order.code}}</i></p>
+            <p class="my-1">Order ID: {{order.code}}</p>
             {{#each order.items}}
-            <p class="my-2 mx-2">{{this.quantityBought}} <b>x</b> {{this.product}}</p>
+            <p class="my-2 mx-2"><i>{{this.quantityBought}} x {{this.product}}</i></p>
             {{/each}}
-            <p class="my-1"><b>Total: ${{order.amount}}</b></p>
+            <p class="my-1">Total: ${{order.amount}}</p>
           </div>
         </div>
         <hr>

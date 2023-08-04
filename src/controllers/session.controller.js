@@ -22,10 +22,10 @@ const login = async (req, res) => {
 
     const user = userDTO(req.user);
     req.session.user = user;
-
+    // req.log.info(`[session-login] ${user.email} logged in successfully`);
     res.status(200).send({ status: 200, message: 'Login successful' });
   } catch (error) {
-    console.log(error);
+    req.log.error(`[session-login] ${error.message}`);
     return res.status(400).send({ status: 'error', message: error.message });
   }
 };
@@ -37,6 +37,7 @@ const logout = async (req, res) => {
 
 const githubCallback = async (req, res) => {
   req.session.user = req.user;
+  // if (req.session.user) req.log.info(`[session] ${req.session.user.email} logged in with GitHub successfully`);
   res.redirect('/products');
 };
 

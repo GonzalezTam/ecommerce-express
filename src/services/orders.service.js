@@ -1,12 +1,13 @@
 import ticketModel from '../dao/models/ticket.model.js';
 import { v4 as uuidv4 } from 'uuid';
-import sendGmail from '../mailing/emailSender.js';
+import { emailSender } from '../utils/mailing/emailSender.js';
 
 const getAllOrders = async (req) => {
   try {
     const orders = await ticketModel.find().lean().exec();
     return { status: 200, orders };
   } catch (error) {
+    req.log.error(`[orders-getAllOrders] ${error.message}`);
     return { status: 500, error: error.message };
   }
 };
@@ -17,6 +18,7 @@ const getOrderById = async (req) => {
     const order = await ticketModel.findOne({ _id: id }).lean().exec();
     return { status: 200, order };
   } catch (error) {
+    req.log.error(`[orders-getOrderById] ${error.message}`);
     return { status: 404, error: 'Order not found' };
   }
 };
@@ -27,6 +29,7 @@ const getOrderByTicketCode = async (req) => {
     const order = await ticketModel.findOne({ code }).lean().exec();
     return { status: 200, order };
   } catch (error) {
+    req.log.error(`[orders-getOrderByTicketCode] ${error.message}`);
     return { status: 404, error: 'Ticket not found' };
   }
 };
@@ -53,8 +56,10 @@ const createOrder = async (req) => {
       operations
     };
 
+    req.log.info(`[orders-createOrder] order ${code} created successfully`);
     return { status: 201, result: newOrder };
   } catch (error) {
+    req.log.error(`[orders-createOrder] ${error.message}`);
     return { status: 500, error: error.message };
   }
 };
@@ -65,9 +70,11 @@ const emailOrder = async (req) => {
   const emailType = `order_${orderStatus}`;
   const emailData = { user, order };
   try {
-    await sendGmail(emailType, emailData);
+    await emailSender(emailType, emailData);
+    req.log.info('[orders-emailOrder] email sent successfully');
     return { status: 201, result: 'Email sent' };
   } catch (error) {
+    req.log.error(`[orders-emailOrder] ${error.message}`);
     return { status: 500, error: error.message };
   }
 };

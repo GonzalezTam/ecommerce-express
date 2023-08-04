@@ -5,6 +5,7 @@ const getAllCarts = async (req) => {
     const carts = await cartModel.find().lean().exec();
     return { status: 200, carts };
   } catch (error) {
+    req.log.error(`[carts-getAllCarts] ${error.message}`);
     return { status: 500, error: error.message };
   }
 };
@@ -13,8 +14,9 @@ const getCartById = async (req) => {
   const id = req.params.cid;
   try {
     const cart = await cartModel.findOne({ _id: id }).populate('products.productId').lean().exec();
-    if (cart) return { status: 200, cart }; else return { status: 404, error: 'Cart not found' };
+    return { status: 200, cart };
   } catch (error) {
+    req.log.error(`[carts-getCartById] ${error.message}`);
     return { status: 404, error: 'Cart not found' };
   }
 };
@@ -55,6 +57,7 @@ const getCheckoutDetail = async (req) => {
 
     return { status: 200, result };
   } catch (error) {
+    req.log.error(`[carts-getCheckoutDetail] ${error.message}`);
     return { status: 500, error: error.message };
   }
 };
@@ -67,8 +70,10 @@ const updateCartById = async (req) => {
   if (!Array.isArray(products)) { return { status: 400, error: 'Products must be an array' }; }
   try {
     const cartUpdated = await cartModel.updateOne({ _id: id }, { products }).lean().exec();
+    req.log.info(`[carts-updateCartById] cart ${id} updated`);
     return { status: 200, cartUpdated };
   } catch (error) {
+    req.log.error(`[carts-updateCartById] ${error.message}`);
     return { status: 404, error: 'Cart not found' };
   }
 };
@@ -78,8 +83,10 @@ const deleteCartById = async (req) => {
   try {
     const cart = await cartModel.findOne({ _id: id }).lean().exec();
     await cartModel.deleteOne({ _id: id }).lean().exec();
+    req.log.info(`[carts-deleteCartById] cart ${id} deleted`);
     return { status: 200, cart };
   } catch (error) {
+    req.log.error(`[carts-deleteCartById] ${error.message}`);
     return { status: 404, error: 'Cart not found' };
   }
 };
@@ -90,8 +97,10 @@ const createCart = async (req) => {
   if (!Array.isArray(products)) return { status: 400, error: 'Products must be an array' };
   try {
     const cart = await cartModel.create({ products });
+    req.log.info(`[carts-createCart] cart ${cart._id} created`);
     return { status: 200, cartCreated: cart };
   } catch (error) {
+    req.log.error(`[carts-createCart] ${error.message}`);
     return { status: 400, error: error.message };
   }
 };
