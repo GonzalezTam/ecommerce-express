@@ -7,16 +7,19 @@ let userCart;
 let socket;
 
 document.onreadystatechange = async () => {
-  const products = (location.pathname === '/productsmanager')
-    ? '/products/manager'
-    : '/products';
-  if (products) {
-    await fetch(`http://localhost:3000/api${products}?limit=all`)
-      .then(res => res.json())
-      .then(data => {
-        productsArray = data.products.payload;
-      })
-      .catch(err => console.log(err));
+  if (location.pathname === '/productsmanager' || location.pathname === '/products') {
+    const products = (location.pathname === '/productsmanager')
+      ? '/products/manager'
+      : '/products';
+    const query = location.search;
+    if (products) {
+      await fetch(`http://localhost:3000/api${products}${query}`)
+        .then(res => res.json())
+        .then(data => {
+          productsArray = data.products.payload;
+        })
+        .catch(err => console.log(err));
+    }
   }
 
   await fetch('http://localhost:3000/api/session/current')

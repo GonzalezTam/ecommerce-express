@@ -3,21 +3,22 @@ import { cartsService } from '../services/carts.service.js';
 
 const getAllProducts = async (req) => {
   try {
-    const limit = req.query.limit;
-    const page = req.query.page;
-    const sort = req.query.sort;
+    const limit = req.query.limit || undefined;
+    const page = req.query.page || 1;
+    const price = req.query.price || null;
 
     // query params for category and status
     const category = req.query.category || null;
     const status = req.query.status || null;
     const query = {
       ...(category && { category }),
-      ...(status && { status })
+      ...(status && { status }),
+      ...(price && { price })
     };
 
-    // if limit is 'all', all products will be returned, no pagination
-    if (limit === 'all') {
-      const products = await productModel.find(query).lean().exec();
+    // if limit has a value, products will be returned with no pagination
+    if (limit === 'all' || limit > 0) {
+      const products = limit === 'all' ? await productModel.find(query).lean().exec() : await productModel.find(query).limit(parseInt(limit)).lean().exec();
       const resObj = {
         status: 'success',
         payload: products,
@@ -27,7 +28,7 @@ const getAllProducts = async (req) => {
     }
 
     // if there is no category or status, the query will be empty and all products will be returned
-    const products = await productModel.paginate(query, { page: page || 1, limit: limit || 10, sort: sort ? { price: sort } : {} });
+    const products = await productModel.paginate(query, { page: page || 1, limit: 10 });
 
     const loopedPages = [];
     for (let i = 0; i < products.totalPages; i++) {
@@ -76,21 +77,22 @@ const getAllProducts = async (req) => {
 
 const getAllProductsManager = async (req) => {
   try {
-    const limit = req.query.limit;
-    const page = req.query.page;
-    const sort = req.query.sort;
+    const limit = req.query.limit || undefined;
+    const page = req.query.page || 1;
+    const price = req.query.price || null;
 
     // query params for category and status
     const category = req.query.category || null;
     const status = req.query.status || null;
     const query = {
       ...(category && { category }),
-      ...(status && { status })
+      ...(status && { status }),
+      ...(price && { price })
     };
 
-    // if limit is 'all', all products will be returned, no pagination
-    if (limit === 'all') {
-      const products = await productModel.find(query).lean().exec();
+    // if limit has a value, products will be returned with no pagination
+    if (limit === 'all' || limit > 0) {
+      const products = limit === 'all' ? await productModel.find(query).lean().exec() : await productModel.find(query).limit(parseInt(limit)).lean().exec();
       const resObj = {
         status: 'success',
         payload: products,
@@ -100,7 +102,7 @@ const getAllProductsManager = async (req) => {
     }
 
     // if there is no category or status, the query will be empty and all products will be returned
-    const products = await productModel.paginate(query, { page: page || 1, limit: limit || 10, sort: sort ? { price: sort } : {} });
+    const products = await productModel.paginate(query, { page: page || 1, limit: 10 });
 
     const loopedPages = [];
     for (let i = 0; i < products.totalPages; i++) {
