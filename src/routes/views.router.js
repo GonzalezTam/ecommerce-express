@@ -2,6 +2,7 @@ import { Router } from 'express';
 import dotEnvConfig from '../config/env.config.js';
 import { auth, authAdminsOnly, authUsersOnly, activeSession, cartOwnership } from '../middlewares/auth.js';
 import { cartsService } from '../services/carts.service.js';
+import { productsService } from '../services/products.service.js';
 const viewsRouter = Router();
 
 const { PORT } = dotEnvConfig;
@@ -60,14 +61,7 @@ viewsRouter.get('/products', auth, async (req, res) => {
   const isAdmin = user?.role === 'admin';
   user = !isAdmin ? req.user : user;
 
-  let page = +req.query.page;
-  if (!page) page = 1;
-  const products = await fetch(`http://localhost:${PORT}/api/products?page=${page}`)
-    .then(res => res.json())
-    .then(data => {
-      return data.products;
-    })
-    .catch(err => req.log.error(`[products] failed to fetch products: ${err}`));
+  const products = await productsService.getAllProducts(req);
   if (user?.cart) {
     const userCartLength = await fetch(`http://localhost:${PORT}/api/carts/${user?.cart}`)
       .then(res => res.json())
@@ -89,15 +83,7 @@ viewsRouter.get('/productsmanager', auth, authAdminsOnly, async (req, res) => {
   const isAdmin = user?.role === 'admin';
   user = !isAdmin ? req.user : user;
 
-  let page = +req.query.page;
-  if (!page) page = 1;
-  let result;
-  await fetch(`http://localhost:${PORT}/api/products/manager?page=${page}`)
-    .then(res => res.json())
-    .then(data => {
-      result = data;
-    })
-    .catch(err => req.log.error(`[productsmanager] failed to fetch products: ${err}`));
+  const products = await productsService.getAllProducts(req);
   if (user?.cart) {
     const userCartLength = await fetch(`http://localhost:${PORT}/api/carts/${user.cart}`)
       .then(res => res.json())
@@ -106,14 +92,14 @@ viewsRouter.get('/productsmanager', auth, authAdminsOnly, async (req, res) => {
         return cartLength;
       })
       .catch(err => req.log.error(`[productsmanager] failed to fetch cart: ${err}`));
-    return res.render('productsmanager', { user, isAdmin, products: result.products, userCartLength });
+    return res.render('productsmanager', { user, isAdmin, products, userCartLength });
   } else {
-    return res.render('productsmanager', { user, isAdmin, products: result.products, userCartLength: 0 });
+    return res.render('productsmanager', { user, isAdmin, products, userCartLength: 0 });
   }
 });
 
 // This route is for admin user only
-viewsRouter.get('/usersmanager', auth, async (req, res) => { });
+viewsRouter.get('/usersmanager', auth, authAdminsOnly, async (req, res) => { });
 
 viewsRouter.get('/:cid/purchase', auth, authUsersOnly, cartOwnership, async (req, res) => {
   try {
