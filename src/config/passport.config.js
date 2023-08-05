@@ -2,6 +2,7 @@ import passport from 'passport';
 import GitHubStrategy from 'passport-github2';
 import local from 'passport-local';
 import userModel from '../dao/models/user.model.js';
+import cartModel from '../dao/models/cart.model.js';
 import { createHash, isValidPassword } from '../middlewares/auth.js';
 import dotEnvConfig from './env.config.js';
 
@@ -14,15 +15,15 @@ const initializePassport = () => {
     usernameField: 'email'
   }, async (req, username, password, done) => {
     const { firstName, lastName, email, age } = req.body;
+    const cart = await cartModel.create({});
 
-    // check if cart id will be generated automatically on register or should be generated later.
     try {
       const newUser = {
         firstName,
         lastName,
         email,
         age,
-        cart: '',
+        cart: cart._id,
         password: createHash(password)
       };
       const result = await userModel.create(newUser);
@@ -58,12 +59,17 @@ const initializePassport = () => {
     try {
       const user = await userModel.findOne({ email }).lean().exec();
       if (user) return done(null, user); // user found, return that user.
-      if (!user || !email) return done(null, false); // user not found, return false.
-      const newUser = {
+      const cart = await cartModel.create({}); // create empty cart for new user
+      const newUser = await userModel.create({
         firstName: name,
-        email
-      };
-      return done(null, newUser);
+        lastName: name,
+        email,
+        age: 0,
+        cart: cart._id,
+        password: createHash(email), // use email as password
+        role: 'user'
+      });
+      return done(null, newUser); // create new user with github account
     } catch (err) {
       return done('Error: ' + err);
     }
