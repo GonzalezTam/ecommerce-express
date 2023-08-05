@@ -94,7 +94,7 @@
           </tr>
         </table>
         <div class="col-12 d-inline-grid">
-          <button id="order-checkout-button" class="btn btn-success btn-sm btn-block">Checkout</button>
+          <button id="order-checkout-button" class="btn btn-success btn-sm btn-block {{#unless userCartLength}}disabled{{/unless}}">Checkout</button>
         </div>
       </div>
     </div>

@@ -77,12 +77,10 @@ document.addEventListener('click', function (e) {
   }
 }, false);
 
-// If cart is empty, link to cart is disabled (TODO: add empty cart page)
 if (cart && cart.innerHTML === '🛒 (0)') {
   if (userSession && userSession.cart) {
     cart.href = `/${userSession.cart}/purchase`;
   }
-  cart.href = '#';
 }
 
 socket = io();
@@ -116,7 +114,6 @@ socket.on('cartCreated', data => {
   const userCartLength = userCart.products?.length || 0;
   if (userCart._id === userSession.cart) {
     cart.innerHTML = '🛒 (' + userCartLength + ')';
-    (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
   }
 });
 socket.on('cartUpdated', data => {
@@ -127,7 +124,6 @@ socket.on('cartUpdated', data => {
   }
   if (userCart._id === userSession.cart) {
     cart.innerHTML = '🛒 (' + userCartLength + ')';
-    (cart.innerHTML === '🛒 (0)') ? cart.href = '#' : cart.href = `/${userCart._id}/purchase`;
   }
 });
 
