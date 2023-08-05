@@ -73,6 +73,14 @@ try {
       const p = data;
       socketServer.emit('update_product', p);
     });
+    socketClient.on('userUpdated', (data) => {
+      const u = data;
+      socketServer.emit('update_user', u);
+    });
+    socketClient.on('userDeleted', (data) => {
+      const uid = data;
+      socketServer.emit('delete_user', uid);
+    });
     socketClient.on('cartCreated', (data) => {
       const cart = data;
       socketServer.emit('cartCreated', cart);

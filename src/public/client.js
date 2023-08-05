@@ -2,6 +2,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-undef */
 let productsArray = [];
+let usersArray = [];
 let userSession;
 let userCart;
 let socket;
@@ -22,6 +23,15 @@ document.onreadystatechange = async () => {
     }
   }
 
+  if (location.pathname === '/usersmanager') {
+    await fetch('http://localhost:3000/api/users/manager')
+      .then(res => res.json())
+      .then(data => {
+        usersArray = data.users.payload;
+      })
+      .catch(err => console.log(err));
+  }
+
   await fetch('http://localhost:3000/api/session/current')
     .then(res => res.json())
     .then(data => {
@@ -30,7 +40,7 @@ document.onreadystatechange = async () => {
     .catch(err => console.log(err));
 };
 
-const managerContainer = document.getElementById('manager-container');
+const managerContainer = document.getElementById('productsmanager-container');
 const managerSubContainer = document.getElementById('manager-sub-container');
 const managerTitle = document.getElementById('manager-title');
 const submitProduct = document.getElementById('submitProduct');
@@ -44,19 +54,26 @@ const description = document.getElementById('description');
 const price = document.getElementById('price');
 const stock = document.getElementById('stock');
 const code = document.getElementById('code');
-const adminPanelButton = document.getElementById('adminPanel-button');
+const productsManagerPanel = document.getElementById('productsManagerPanel-button');
+const usersManagerPanel = document.getElementById('usersManager-button');
 
 document.addEventListener('click', function (e) {
   if (e.target.matches('.remove-product')) delete_product(e.target.dataset.id);
   if (e.target.matches('.edit-product')) edit_product(e.target.dataset.id);
+  if (e.target.matches('.remove-user')) delete_user(e.target.dataset.id);
+  if (e.target.matches('.edit-user')) edit_user(e.target.dataset.id);
   if (userSession && userSession.cart) {
     if (e.target.matches('.add-to-cart')) update_cart(e.target.dataset.id);
   } else {
     if (e.target.matches('.add-to-cart')) create_cart(e.target.dataset.id);
   }
-  if (e.target.matches('#adminPanel-button')) {
+  if (e.target.matches('#productsManagerPanel-button')) {
     e.preventDefault();
     document.location.href = '/productsmanager';
+  }
+  if (e.target.matches('#usersManager-button')) {
+    e.preventDefault();
+    document.location.href = '/usersmanager';
   }
 }, false);
 
@@ -83,6 +100,16 @@ socket.on('delete_product', data => {
   const queryString = window.location.search;
   const urlParams = new URLSearchParams(queryString);
   if (document.location.pathname === '/productsmanager') document.location.href = `/productsmanager?${urlParams}`;
+});
+socket.on('update_user', data => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  if (document.location.pathname === '/usersmanager') document.location.href = `/usersmanager?${urlParams}`;
+});
+socket.on('delete_user', data => {
+  const queryString = window.location.search;
+  const urlParams = new URLSearchParams(queryString);
+  if (document.location.pathname === '/usersmanager') document.location.href = `/usersmanager?${urlParams}`;
 });
 socket.on('cartCreated', data => {
   userCart = { _id: data._id, products: data.products };
@@ -168,6 +195,125 @@ async function edit_product (id) {
   updateProduct.disabled = false;
   updateProduct.dataset.id = id;
   submitProduct.disabled = true;
+}
+
+async function edit_user (id) {
+  const user = usersArray.find(p => p._id === id);
+  Swal.fire({
+    title: `<h5>Editing ${user.email}</h5>`,
+    icon: false,
+    html: `<div class="form-group">
+            <label class="mx-2 small" for="role">Select role:</label>
+            <select id="role" class="small" style="width: 150px; outline:none;">
+              <option value="user" ${user.role === 'user' && 'selected'}>User</option>
+              <option value="premium" ${user.role === 'premium' && 'selected'}>Premium</option>
+              <option value="admin" ${user.role === 'admin' && 'selected'}>Administrator</option>
+            </select>
+          </div>`,
+    showCancelButton: true,
+    focusConfirm: false,
+    confirmButtonText:
+      'Save',
+    cancelButtonText:
+      'Cancel',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33'
+  }).then(async (result) => {
+    const role = document.getElementById('role').value;
+    if (result.isConfirmed) {
+      try {
+        fetch(`http://localhost:3000/api/users/${id}`, {
+          method: 'put',
+          body: JSON.stringify({ role }),
+          headers: { 'Content-Type': 'application/json' }
+        }).then(async (response) => {
+          const data = await response.json();
+          if (data.status === 200) {
+            const swalNoConfirmButton = Swal.mixin({
+              showConfirmButton: false
+            });
+            swalNoConfirmButton.fire(
+              'Saved!',
+              'User has been updated.',
+              'success',
+              setTimeout(() => {
+                socket = io();
+                socket.emit('userUpdated', data.userUpdated);
+              }, 1000)
+            );
+          } else if (data.status === 400) {
+            console.error(data.error);
+            Swal.fire(
+              'Ups!',
+              'Something went wrong.',
+              'error'
+            );
+          } else {
+            Swal.fire(
+              'Ups!',
+              'Something went wrong.',
+              'error'
+            );
+            throw new Error('Unexpected response');
+          }
+        });
+      } catch (err) {
+        console.error(`Error: ${err}`);
+      }
+    }
+  });
+}
+
+async function delete_user (id) {
+  const user = usersArray.find(u => u._id === id);
+  Swal.fire({
+    title: 'Be careful!',
+    text: `You are about to delete user: ${user.email}`,
+    icon: 'warning',
+    showCancelButton: true,
+    focusConfirm: false,
+    confirmButtonText:
+      'Delete',
+    cancelButtonText:
+      'Cancel',
+    confirmButtonColor: '#3085d6',
+    cancelButtonColor: '#d33'
+  }).then(async (result) => {
+    if (result.isConfirmed) {
+      try {
+        fetch(`http://localhost:3000/api/users/${id}`, {
+          method: 'delete'
+        }).then(async (response) => {
+          const data = await response.json();
+          if (data.status === 200) {
+            const swalNoConfirmButton = Swal.mixin({
+              showConfirmButton: false
+            });
+            swalNoConfirmButton.fire(
+              'Deleted!',
+              'User has been deleted.',
+              'success',
+              setTimeout(() => {
+                socket = io();
+                socket.emit('userDeleted', data.deletedUser);
+              }, 1000)
+            );
+          } else if (data.status === 400) {
+            console.error(data.error);
+            Swal.fire(
+              'Ups!',
+              'Something went wrong.',
+              'error'
+            );
+          } else {
+            throw new Error('Unexpected response');
+          }
+        });
+      } catch (err) {
+        console.error(`Error: ${err}`);
+      }
+    }
+  });
 }
 
 async function create_cart (id) {

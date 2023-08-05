@@ -1,0 +1,97 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-light px-4">
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarTogglerDemo01"
+    aria-controls="navbarTogglerDemo01" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse justify-content-between" id="navbarTogglerDemo01">
+    <ul class="navbar-nav mr-auto mt-2 mt-lg-0">
+      <a class="navbar-brand" href="#">🕹</a>
+      <li class="nav-item">
+        <a class="nav-link" href="/products">Products</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/profile">Profile</a>
+      </li>
+      <li class="nav-item ml-2">
+        <a class="nav-link" id="chat-access" href="/chat">Chat 💬</a>
+      </li>
+      {{!--<li class="nav-item">
+        <a class="nav-link disabled" href="#">Disabled</a>
+      </li>--}}
+    </ul>
+    <form class="form-inline my-2 my-lg-0">
+      <!-- Admin has access to admin panel -->
+      {{#if isAdmin}}
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="usersManager-button">👥</button>
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="productsManagerPanel-button">⚙</button>
+      {{/if}}
+      <button class="btn btn-sm btn-danger my-2 my-sm-0" id="logout-button">Logout</button>
+    </form>
+  </div>
+</nav>
+
+<div class="container" id="usersmanager-container">
+  <div class="row mt-4 mb-2">
+    <h1>Users</h1>
+  </div>
+
+  <table id="usersmanagerTable" class="table">
+    <tr>
+      {{!--<td><strong>Created</strong></td>
+      <td><strong>Last Connection</strong></td>--}}
+      {{!--<td><strong>ID</strong></td>--}}
+      <td><strong>Name</strong></td>
+      <td><strong>User</strong></td>
+      <td><strong>Role</strong></td>
+      <td class="text-center"><strong>Edit</strong></td>
+      <td class="text-center"><strong>Remove</strong></td>
+    </tr>
+    {{#if users.payload.length}}
+    {{#each users.payload }}
+    <tr>
+      {{!--<td>{{this.created}}</td>
+      <td>{{this.last_connection}}</td>--}}
+      {{!--<td>{{this._id}}</td>--}}
+      <td>{{this.firstName}} {{this.lastName}}</td>
+      <td>{{this.email}}</td>
+      <td>{{this.role}}</td>
+      <td class="text-center">
+        <button data-id={{this._id}} type="button" class="edit-user btn btn-warning btn-sm">✍🏻</button>
+      </td>
+      <td class="text-center">
+        <button data-id={{this._id}} type="button" class="remove-user btn btn-danger btn-sm">❌</button>
+      </td>
+    </tr>
+    {{/each}}
+    <!-- If no users -->
+    {{else}}
+    <tr>
+      <td colspan="8" class="text-center">No users found</td>
+    </tr>
+    {{/if}}
+  </table>
+
+  {{!-- Pagination --}}
+  <nav aria-label="Users pagination">
+    <ul class="pagination">
+      {{#if users.hasPrevPage}}
+      <li class="page-item">
+        <a class="page-link" href="{{users.prevLink}}" tabindex="-1">Previous</a>
+      </li>
+      {{/if}}
+      {{#each users.loopedPages}}
+      <li class="page-item">
+        <a class="page-link" href="/usersmanager?page={{this.page}}" data-page="{{this}}">{{this.page}}</a>
+      </li>
+      {{/each}}
+      {{#if users.hasNextPage}}
+      <li class="page-item">
+        <a class="page-link" href="{{users.nextLink}}">Next</a>
+      </li>
+      {{/if}}
+    </ul>
+  </nav>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="client.js"></script>
+  <script src="session.js"></script>

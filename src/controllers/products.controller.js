@@ -2,7 +2,6 @@ import { productsService } from '../services/products.service.js';
 
 const getAllProducts = async (req, res) => {
   const result = await productsService.getAllProducts(req);
-  req.log.info(`[getAllProducts] ${result.payload.length} products returned`);
   res.send({ products: result });
 };
 
