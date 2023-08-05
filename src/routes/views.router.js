@@ -3,6 +3,7 @@ import dotEnvConfig from '../config/env.config.js';
 import { auth, authAdminsOnly, authUsersOnly, activeSession, cartOwnership } from '../middlewares/auth.js';
 import { cartsService } from '../services/carts.service.js';
 import { productsService } from '../services/products.service.js';
+import { usersService } from '../services/users.service.js';
 const viewsRouter = Router();
 
 const { PORT } = dotEnvConfig;
@@ -99,7 +100,15 @@ viewsRouter.get('/productsmanager', auth, authAdminsOnly, async (req, res) => {
 });
 
 // This route is for admin user only
-viewsRouter.get('/usersmanager', auth, authAdminsOnly, async (req, res) => { });
+viewsRouter.get('/usersmanager', auth, authAdminsOnly, async (req, res) => {
+  // workaround to get user from session and use admin hardcoded user
+  let user = req.session.user;
+  const isAdmin = user?.role === 'admin';
+  user = !isAdmin ? req.user : user;
+
+  const users = await usersService.getAllUsersManager(req);
+  return res.render('usersmanager', { user, isAdmin, users });
+});
 
 viewsRouter.get('/:cid/purchase', auth, authUsersOnly, cartOwnership, async (req, res) => {
   try {
