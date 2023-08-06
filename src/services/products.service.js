@@ -76,6 +76,7 @@ const getAllProducts = async (req) => {
 };
 
 const getAllProductsManager = async (req) => {
+  const user = req.session.user;
   try {
     const limit = req.query.limit || undefined;
     const page = req.query.page || 1;
@@ -87,7 +88,9 @@ const getAllProductsManager = async (req) => {
     const query = {
       ...(category && { category }),
       ...(status && { status }),
-      ...(price && { price })
+      ...(price && { price }),
+      // if user is premium, only products created by the user will be returned
+      ...(user.role === 'premium' && { owner: user.email })
     };
 
     // if limit has a value, products will be returned with no pagination
@@ -168,6 +171,8 @@ const getProductsById = async (req) => {
 };
 
 const createProduct = async (req) => {
+  if (req.session.user.role === 'user') { return { error: 'You are not authorized to perform this action', status: 401 }; }
+
   if (req.body.id || req.body._id) {
     const result = { error: 'ID must not be provided', status: 400 };
     req.log.error('[products-createProduct] ID provided');
@@ -185,6 +190,7 @@ const createProduct = async (req) => {
   }
 
   const product = {
+    owner: req.session.user.role === 'admin' ? 'admin' : req.user.email,
     title: req.body.title,
     description: req.body.description,
     price: req.body.price,
@@ -210,7 +216,10 @@ const createProduct = async (req) => {
 const updateProduct = async (req) => {
   const id = req.params.id;
   try {
+    // if the user is not admin, he can only update his own products
+    const userUpdating = req.session.user.role === 'admin' ? 'admin' : req.user.email;
     const toUpdateProduct = await productModel.findOne({ _id: id }).lean().exec();
+    if (userUpdating !== 'admin' && userUpdating !== toUpdateProduct.owner) { return { error: 'You are not authorized to perform this action', status: 401 }; }
     if (req.body.id) {
       const result = { error: 'ID must not be provided', status: 400 };
       req.log.error('[products-updateProduct] ID provided');
@@ -308,6 +317,12 @@ const updateProductsStockByOrder = async (req, res) => {
 const deleteProduct = async (req) => {
   const id = req.params.id;
   try {
+    // check if the user is authorized to delete the product
+    const userDeleting = req.session.user.role === 'admin' ? 'admin' : req.user.email;
+    const toDeleteProduct = await productModel.findOne({ _id: id }).lean().exec();
+    if (userDeleting !== 'admin' && userDeleting !== toDeleteProduct.owner) { return { error: 'You are not authorized to perform this action', status: 401 }; }
+
+    // delete the product
     const deletedProduct = await productModel.deleteOne({ _id: id });
     const result = { deletedProduct: { ...deletedProduct, _id: id }, status: 200 };
     req.log.info('[products-deleteProduct] product deleted successfully');

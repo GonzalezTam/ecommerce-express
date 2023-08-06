@@ -56,6 +56,7 @@ viewsRouter.get('/profile', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async 
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
+  const isPremium = user?.role === 'premium';
   user = !isAdmin ? req.user : user;
 
   if (user?.cart) {
@@ -66,9 +67,9 @@ viewsRouter.get('/profile', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async 
         return cartLength;
       })
       .catch(err => req.log.error(`[profile] failed to fetch cart: ${err}`));
-    res.render('profile', { user, isAdmin, userCartLength });
+    res.render('profile', { user, isAdmin, isPremium, userCartLength });
   } else {
-    res.render('profile', { user, isAdmin, userCartLength: 0 });
+    res.render('profile', { user, isAdmin, isPremium, userCartLength: 0 });
   }
 });
 
@@ -76,6 +77,7 @@ viewsRouter.get('/products', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
+  const isPremium = user?.role === 'premium';
   user = !isAdmin ? req.user : user;
 
   const products = await productsService.getAllProducts(req);
@@ -87,9 +89,9 @@ viewsRouter.get('/products', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async
         return cartLength;
       })
       .catch(err => req.log.error(`[products] failed to fetch cart: ${err}`));
-    return res.render('products', { user, isAdmin, products, userCartLength });
+    return res.render('products', { user, isAdmin, isPremium, products, userCartLength });
   } else {
-    return res.render('products', { user, isAdmin, products, userCartLength: 0 });
+    return res.render('products', { user, isAdmin, isPremium, products, userCartLength: 0 });
   }
 });
 
@@ -98,9 +100,10 @@ viewsRouter.get('/productsmanager', handlePolicies(['PREMIUM', 'ADMIN']), async 
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
+  const isPremium = user?.role === 'premium';
   user = !isAdmin ? req.user : user;
 
-  const products = await productsService.getAllProducts(req);
+  const products = await productsService.getAllProductsManager(req);
   if (user?.cart) {
     const userCartLength = await fetch(`http://localhost:${PORT}/api/carts/${user.cart}`)
       .then(res => res.json())
@@ -109,9 +112,9 @@ viewsRouter.get('/productsmanager', handlePolicies(['PREMIUM', 'ADMIN']), async 
         return cartLength;
       })
       .catch(err => req.log.error(`[productsmanager] failed to fetch cart: ${err}`));
-    return res.render('productsmanager', { user, isAdmin, products, userCartLength });
+    return res.render('productsmanager', { user, isAdmin, isPremium, products, userCartLength });
   } else {
-    return res.render('productsmanager', { user, isAdmin, products, userCartLength: 0 });
+    return res.render('productsmanager', { user, isAdmin, isPremium, products, userCartLength: 0 });
   }
 });
 
@@ -126,7 +129,7 @@ viewsRouter.get('/usersmanager', handlePolicies(['ADMIN']), async (req, res) => 
   return res.render('usersmanager', { user, isAdmin, users });
 });
 
-viewsRouter.get('/:cid/purchase', handlePolicies(['USER']), cartOwnership, async (req, res) => {
+viewsRouter.get('/:cid/purchase', handlePolicies(['USER', 'PREMIUM']), cartOwnership, async (req, res) => {
   try {
     const cid = req.params.cid;
     const result = await cartsService.getCheckoutDetail(req);
@@ -139,7 +142,7 @@ viewsRouter.get('/:cid/purchase', handlePolicies(['USER']), cartOwnership, async
   }
 });
 
-viewsRouter.get('/purchase/:ticketCode', handlePolicies(['USER']), async (req, res) => {
+viewsRouter.get('/purchase/:ticketCode', handlePolicies(['USER', 'PREMIUM']), async (req, res) => {
   const ticketCode = req.params.ticketCode;
   const hasWarning = req.query.warning;
   try {
@@ -162,6 +165,7 @@ viewsRouter.get('/chat', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (re
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
+  const isPremium = user?.role === 'premium';
   user = !isAdmin ? req.user : user;
 
   let result;
@@ -179,9 +183,9 @@ viewsRouter.get('/chat', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (re
         return cartLength;
       })
       .catch(err => req.log.error(`[chat] failed to fetch cart: ${err}`));
-    return res.render('chat', { user, isAdmin, messages: result, userCartLength });
+    return res.render('chat', { user, isAdmin, isPremium, messages: result, userCartLength });
   } else {
-    return res.render('chat', { user, isAdmin, messages: result, userCartLength: 0 });
+    return res.render('chat', { user, isAdmin, isPremium, messages: result, userCartLength: 0 });
   }
 });
 

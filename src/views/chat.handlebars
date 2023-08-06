@@ -26,7 +26,10 @@
 			{{/unless}}
 		</ul>
 		<form class="form-inline my-2 my-lg-0">
-			<!-- Admin has access to admin panel -->
+      <!-- Access to managers depends on user role -->
+      {{#if isPremium}}
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="productsManagerPanel-button">⚙</button>
+      {{/if}}
 			{{#if isAdmin}}
       <button class="btn btn-sm btn-light my-2 my-sm-0" id="usersManager-button">👥</button>
 			<button class="btn btn-sm btn-light my-2 my-sm-0" id="productsManagerPanel-button">⚙</button>
