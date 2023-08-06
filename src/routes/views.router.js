@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import dotEnvConfig from '../config/env.config.js';
-import { auth, authAdminsOnly, authUsersOnly, activeSession, cartOwnership } from '../middlewares/auth.js';
+import { handlePolicies, cartOwnership } from '../middlewares/auth.js';
 import { cartsService } from '../services/carts.service.js';
 import { productsService } from '../services/products.service.js';
 import { usersService } from '../services/users.service.js';
@@ -10,12 +10,11 @@ const viewsRouter = Router();
 const { PORT } = dotEnvConfig;
 
 // TODO: refactor this  file.
-// TODO: create usermanager view with asignable roles.
 
 // if user is logged in, redirect to products page.
-viewsRouter.get('/', auth, async (req, res) => res.redirect('/products'));
+viewsRouter.get('/', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (req, res) => res.redirect('/products'));
 
-viewsRouter.get('/register', activeSession, (req, res) => {
+viewsRouter.get('/register', handlePolicies(['PUBLIC']), (req, res) => {
   const failed = req.query.failed;
   if (failed) {
     req.log.error('[session-register] failed to register user');
@@ -24,7 +23,7 @@ viewsRouter.get('/register', activeSession, (req, res) => {
   res.render('register');
 });
 
-viewsRouter.get('/login', activeSession, (req, res) => {
+viewsRouter.get('/login', handlePolicies(['PUBLIC']), (req, res) => {
   const failed = req.query.failed;
   if (failed === 'true') {
     req.log.error('[session-login] failed to login user');
@@ -37,11 +36,11 @@ viewsRouter.get('/login', activeSession, (req, res) => {
   res.render('login');
 });
 
-viewsRouter.get('/forgot-password', activeSession, (req, res) => {
+viewsRouter.get('/forgot-password', handlePolicies(['PUBLIC']), (req, res) => {
   res.render('forgotpassword');
 });
 
-viewsRouter.get('/reset-password/:token', activeSession, async (req, res) => {
+viewsRouter.get('/reset-password/:token', handlePolicies(['PUBLIC']), async (req, res) => {
   const token = req.params.token;
   try {
     const result = await sessionsService.checkToken(token);
@@ -53,7 +52,7 @@ viewsRouter.get('/reset-password/:token', activeSession, async (req, res) => {
   }
 });
 
-viewsRouter.get('/profile', auth, async (req, res) => {
+viewsRouter.get('/profile', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (req, res) => {
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
@@ -73,7 +72,7 @@ viewsRouter.get('/profile', auth, async (req, res) => {
   }
 });
 
-viewsRouter.get('/products', auth, async (req, res) => {
+viewsRouter.get('/products', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (req, res) => {
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
@@ -94,8 +93,8 @@ viewsRouter.get('/products', auth, async (req, res) => {
   }
 });
 
-// This route is for admin user only
-viewsRouter.get('/productsmanager', auth, authAdminsOnly, async (req, res) => {
+// This route is for admin/premium user only
+viewsRouter.get('/productsmanager', handlePolicies(['PREMIUM', 'ADMIN']), async (req, res) => {
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
@@ -117,7 +116,7 @@ viewsRouter.get('/productsmanager', auth, authAdminsOnly, async (req, res) => {
 });
 
 // This route is for admin user only
-viewsRouter.get('/usersmanager', auth, authAdminsOnly, async (req, res) => {
+viewsRouter.get('/usersmanager', handlePolicies(['ADMIN']), async (req, res) => {
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
@@ -127,7 +126,7 @@ viewsRouter.get('/usersmanager', auth, authAdminsOnly, async (req, res) => {
   return res.render('usersmanager', { user, isAdmin, users });
 });
 
-viewsRouter.get('/:cid/purchase', auth, authUsersOnly, cartOwnership, async (req, res) => {
+viewsRouter.get('/:cid/purchase', handlePolicies(['USER']), cartOwnership, async (req, res) => {
   try {
     const cid = req.params.cid;
     const result = await cartsService.getCheckoutDetail(req);
@@ -140,7 +139,7 @@ viewsRouter.get('/:cid/purchase', auth, authUsersOnly, cartOwnership, async (req
   }
 });
 
-viewsRouter.get('/purchase/:ticketCode', auth, authUsersOnly, async (req, res) => {
+viewsRouter.get('/purchase/:ticketCode', handlePolicies(['USER']), async (req, res) => {
   const ticketCode = req.params.ticketCode;
   const hasWarning = req.query.warning;
   try {
@@ -159,7 +158,7 @@ viewsRouter.get('/purchase/:ticketCode', auth, authUsersOnly, async (req, res) =
   }
 });
 
-viewsRouter.get('/chat', auth, async (req, res) => {
+viewsRouter.get('/chat', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (req, res) => {
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';

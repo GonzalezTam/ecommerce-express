@@ -5,39 +5,34 @@ import dotEnvConfig from '../config/env.config.js';
 
 const { ADMIN_EMAIL, ADMIN_PASSWORD } = dotEnvConfig;
 
-// if user is not logged in, redirect to login page.
-export const auth = (req, res, next) => {
-  if (req.session.user) return next();
-  const path = req.path;
-  const failed = req.query.failed || true;
-  if (path === '/' && !req.query.failed) return res.redirect('/login');
-  return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
-};
+export const handlePolicies = policies => (req, res, next) => {
+  // if PUBLIC policy is present and user is logged in, redirect to profile.
+  if (policies.includes('PUBLIC') && req.session.user) return res.redirect('/profile');
+  // if PUBLIC policy is present, allow access.
+  if (policies.includes('PUBLIC')) return next();
 
-// if user is not admin, redirect to home page.
-export const authAdminsOnly = (req, res, next) => {
-  if (req.session.user?.role === 'admin') return next();
-  req.log.warn(`[auth-admins-only] user ${req.session.user.email} tried to access ${req.path}`);
-  return res.redirect('/');
-};
-
-// if user role is not 'user', redirect to home page.
-export const authUsersOnly = (req, res, next) => {
-  if (req.session.user?.role === 'user') return next();
-  req.log.warn(`[auth-users-only] admin ${req.session.user.email} tried to access ${req.path}`);
-  return res.redirect('/');
-};
-
-// if user is logged in, redirect to profile.
-export const activeSession = (req, res, next) => {
-  if (!req.session.user) return next();
-  return res.redirect('/profile');
+  // if user is logged in, check if user role is in policies.
+  if (req.session.user) {
+    if (policies.length > 0) {
+      if (!policies.includes(req.session.user.role.toUpperCase())) {
+        req.log.warn(`[handle-policies] user ${req.session.user.email} tried to access ${req.path}`);
+        return res.status(403).json({ status: 'error', error: 'You are not authorized' });
+      }
+    }
+    next();
+  } else {
+    // if user is not logged in, redirect to login page.
+    const path = req.path;
+    const failed = req.query.failed || true;
+    if (path === '/' && !req.query.failed) return res.redirect('/login');
+    return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
+  }
 };
 
 // if user is not the owner of the cart, respond with 401.
 export const cartOwnership = async (req, res, next) => {
   const cartId = req.params.cid;
-  if (req.user.cart === cartId) return next();
+  if (req.session.user.cart === cartId) return next();
   else {
     req.log.warn(`[cart-ownership] user ${req.user._id} tried to access cart ${cartId}`);
     res.status(401).send({ message: 'Unauthorized' });
@@ -107,10 +102,7 @@ export const passportGitHubAuth = passport.authenticate('github', { scope: ['use
 export const passportGitHubCallback = passport.authenticate('github', { failureRedirect: '/login?failed=github' });
 
 export default {
-  auth,
-  authAdminsOnly,
-  authUsersOnly,
-  activeSession,
+  handlePolicies,
   cartOwnership,
   loginValidations,
   registerValidations,
