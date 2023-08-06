@@ -14,6 +14,7 @@ cartsRouter.post('/', cartsController.createCart);
 
 // Todo: create a controller for this
 cartsRouter.post('/:cid/products/:pid', async (req, res) => {
+  const user = req.session.user;
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const quantity = 0;
@@ -26,9 +27,10 @@ cartsRouter.post('/:cid/products/:pid', async (req, res) => {
     return;
   }
   try {
-    const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
-    // eslint-disable-next-line no-unused-vars
     const product = await productModel.findOne({ _id: productId }).lean().exec();
+    if (user.email === product.owner) { return res.status(400).send({ error: 'You cannot add your own product to your cart' }); }
+
+    const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
     const productInCart = Object.values(cart.products).some(product => product.productId === productId);
 
     if (!productInCart) {
@@ -51,6 +53,7 @@ cartsRouter.put('/:cid/products/:pid', async (req, res) => {
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const quantity = +req.body.quantity;
+
   if (!req.params.cid) {
     res.status(400).send({ error: 'No Cart ID provided' });
     return;

@@ -26,7 +26,10 @@
       {{/unless}}
     </ul>
     <form class="form-inline my-2 my-lg-0">
-      <!-- Admin has access to admin panel -->
+      <!-- Access to managers depends on user role -->
+      {{#if isPremium}}
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="productsManagerPanel-button">⚙</button>
+      {{/if}}
       {{#if isAdmin}}
       <button class="btn btn-sm btn-light my-2 my-sm-0" id="usersManager-button">👥</button>
       <button class="btn btn-sm btn-light my-2 my-sm-0" id="productsManagerPanel-button">⚙</button>
@@ -91,6 +94,7 @@
       <td><strong>Category</strong></td>
       <td><strong>Price</strong></td>
       <td><strong>Stock</strong></td>
+      <td><strong>Owner</strong></td>
       <td class="text-center"><strong>Edit</strong></td>
       <td class="text-center"><strong>Remove</strong></td>
     </tr>
@@ -103,6 +107,7 @@
       <td>{{this.category}}</td>
       <td>{{this.price}}</td>
       <td>{{this.stock}}</td>
+      <td>{{this.owner}}</td>
       <td class="text-center">
         <button data-id={{this._id}} type="button" class="edit-product btn btn-warning btn-sm">✍🏻</button>
       </td>
@@ -114,7 +119,7 @@
     <!-- If no products -->
     {{else}}
     <tr>
-      <td colspan="8" class="text-center">No products found</td>
+      <td colspan="9" class="text-center">No products found</td>
     </tr>
     {{/if}}
   </table>

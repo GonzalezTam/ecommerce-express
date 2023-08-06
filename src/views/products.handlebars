@@ -29,7 +29,10 @@
       </span>
     </ul>
     <form class="form-inline my-2 my-lg-0">
-      <!-- Admin has access to admin panel -->
+      <!-- Access to managers depends on user role -->
+      {{#if isPremium}}
+      <button class="btn btn-sm btn-light my-2 my-sm-0" id="productsManagerPanel-button">⚙</button>
+      {{/if}}
       {{#if isAdmin}}
       <button class="btn btn-sm btn-light my-2 my-sm-0" id="usersManager-button">👥</button>
       <button class="btn btn-sm btn-light my-2 my-sm-0" id="productsManagerPanel-button">⚙</button>
@@ -64,6 +67,7 @@
         {{/if}}
         <li class="list-group-item small">Code: {{this.code}}</li>
         <li class="list-group-item small">ID: {{this._id}}</li>
+        <li class="list-group-item small">Seller: {{this.owner}}</li>
       </ul>
     </div>
     {{/each}}
@@ -87,9 +91,11 @@
         {{/if}}
         <li class="list-group-item small">Code: {{this.code}}</li>
         <li class="list-group-item small">ID: {{this._id}}</li>
+        <li class="list-group-item small">Seller: {{this.owner}}</li>
       </ul>
       <ul class="card-footer m-0 row">
-        <button class="justify-content-center m-0 btn btn-secondary btn-sm add-to-cart {{#unless this.stock}}disabled{{/unless}}"
+        <button
+          class="justify-content-center m-0 btn btn-secondary btn-sm add-to-cart {{#unless this.stock}}disabled{{/unless}}"
           data-id="{{this._id}}">Add to cart</button>
       </ul>
     </div>

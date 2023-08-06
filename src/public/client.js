@@ -163,6 +163,12 @@ async function delete_product (id) {
               'Something went wrong.',
               'error'
             );
+          } else if (data.status === 401) {
+            Swal.fire(
+              'Ups!',
+              'You are not authorized to perform this action.',
+              'error'
+            );
           } else {
             Swal.fire(
               'Ups!',
@@ -369,6 +375,11 @@ async function update_cart (id) {
     } else if (response.status === 400) {
       const data = await response.json();
       console.error(data.error);
+      Swal.fire(
+        'Ups!',
+        'Something went wrong.',
+        'error'
+      );
     } else {
       throw new Error('Unexpected response');
     }
@@ -441,6 +452,12 @@ submitProduct?.addEventListener('click', async (e) => {
             'error'
           );
           console.error(data.error);
+        } else if (data.status === 401) {
+          Swal.fire(
+            'Ups!',
+            'You are not authorized to perform this action.',
+            'error'
+          );
         } else {
           throw new Error(data.error || 'Unexpected response');
         }
@@ -494,6 +511,12 @@ updateProduct?.addEventListener('click', async (e) => {
           Swal.fire(
             'Ups!',
             'Something went wrong.',
+            'error'
+          );
+        } else if (data.status === 401) {
+          Swal.fire(
+            'Ups!',
+            'You are not authorized to perform this action.',
             'error'
           );
         } else {
