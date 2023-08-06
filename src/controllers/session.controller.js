@@ -1,5 +1,6 @@
 import { sessionsService } from '../services/session.service.js';
 import { userDTO } from '../dto/user.dto.js';
+import passwordsResetModel from '../dao/models/passwordsReset.model.js';
 
 const getCurrent = async (req, res) => {
   // hardcode admin user (is not in db)
@@ -30,6 +31,17 @@ const login = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  const result = await sessionsService.forgotPassword(req);
+  res.status(result.status).send(result);
+};
+
+const resetPassword = async (req, res) => {
+  const result = await sessionsService.resetPassword(req);
+  if (result.status === 200) await passwordsResetModel.updateOne({ token: req.body.token }, { isUsed: true });
+  res.status(result.status).send(result);
+};
+
 const logout = async (req, res) => {
   const result = await sessionsService.logout(req);
   res.status(result.status).send(result);
@@ -45,6 +57,8 @@ const sessionsController = {
   getCurrent,
   register,
   login,
+  forgotPassword,
+  resetPassword,
   githubCallback,
   logout
 };

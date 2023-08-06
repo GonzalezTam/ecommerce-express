@@ -22,7 +22,10 @@
 						<input type="password" class="form-control" id="inputPassword" placeholder="Password">
 					</div>
 				</div>
-				<button class="btn btn-primary mt-3" id="login-button">Log in</button>
+				<div class="form-row justify-content-center">
+					<button class="btn btn-primary mt-3" id="login-button">Log in</button>
+					<a href="/forgot-password" class="btn btn-link mt-3">I forgot my password</a>
+				</div>
 				{{#if message}}
 				<div class="alert alert-danger mt-4" id="login-failed" role="alert">{{message}}</div>
 				{{/if}}

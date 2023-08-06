@@ -24,7 +24,36 @@ const parseEmailData = async (type, data) => {
 
   switch (type) {
     // case 'register':
-    // case 'reset_password':
+    case 'forgot_password':
+      subject = 'Reset password';
+      template = {
+        body: {
+          name: data.user.firstName,
+          intro: 'You have received this email because a password reset request for your account was received.',
+          action: {
+            instructions: 'Click the button below to reset your password:',
+            button: {
+              color: '#33b5e5',
+              text: 'Reset your password',
+              link: `http://localhost:3000/reset-password/${data.token}`
+            }
+          },
+          outro: 'If you did not request a password reset, no further action is required on your part.',
+          signature: false
+        }
+      };
+      break;
+    case 'reset_password':
+      subject = 'Password changed';
+      template = {
+        body: {
+          name: data.user.firstName,
+          intro: 'This is a confirmation that the password for your account has just been changed.',
+          outro: 'If you did not make this change, please contact us immediately.',
+          signature: false
+        }
+      };
+      break;
     case 'order_success':
       subject = 'Order created';
       template = {
