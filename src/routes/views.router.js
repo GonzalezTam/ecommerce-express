@@ -4,6 +4,7 @@ import { auth, authAdminsOnly, authUsersOnly, activeSession, cartOwnership } fro
 import { cartsService } from '../services/carts.service.js';
 import { productsService } from '../services/products.service.js';
 import { usersService } from '../services/users.service.js';
+import { sessionsService } from '../services/session.service.js';
 const viewsRouter = Router();
 
 const { PORT } = dotEnvConfig;
@@ -34,6 +35,22 @@ viewsRouter.get('/login', activeSession, (req, res) => {
     return res.render('login', { message: 'Github login failed. Something went wrong..' });
   }
   res.render('login');
+});
+
+viewsRouter.get('/forgot-password', activeSession, (req, res) => {
+  res.render('forgotpassword');
+});
+
+viewsRouter.get('/reset-password/:token', activeSession, async (req, res) => {
+  const token = req.params.token;
+  try {
+    const result = await sessionsService.checkToken(token);
+    if (result.status === 200) return res.render('resetpassword', { token });
+    res.render('resetpassword', { error: result.message });
+  } catch (error) {
+    req.log.error(`[session-reset-password] ${error.message}`);
+    res.render('resetpassword', { message: 'Invalid token' });
+  }
 });
 
 viewsRouter.get('/profile', auth, async (req, res) => {
