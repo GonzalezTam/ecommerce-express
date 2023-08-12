@@ -333,13 +333,13 @@ async function create_cart (id) {
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
     }).then(async (response) => {
-      if (response.status === 200) {
+      if (response.status === 201) {
         const data = await response.json();
         if (data) {
           const userId = userSession._id;
           const cartId = data.cartCreated._id;
           const res = await udpate_user_cart(userId, cartId);
-          if (res.status === 200) {
+          if (res.status === 201) {
             userSession.cart = cartId;
             socket = io();
             socket.emit('cartCreated', data.cartCreated);

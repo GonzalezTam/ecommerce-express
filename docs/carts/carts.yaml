@@ -1,0 +1,167 @@
+paths:
+  /api/carts: #/api/carts
+    get: #get
+      tags:
+        - Carts
+      summary: Get all carts
+      operationId: getAllCarts
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+    post: #post
+      tags:
+        - Carts
+      summary: Create a new cart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                productId:
+                  type: string
+                quantity:
+                  type: number
+              example:
+                products:
+                - productId: 64bee9d54f723c86390233e8
+                  quantity: 2
+                - productId: 64bee9d54f723c86390233e8
+                  quantity: 1
+      operationId: createCart
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+  /api/carts/{cid}: #/api/carts/{cid}
+    get: #get
+      tags:
+        - Carts
+      summary: Get cart by id
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+      operationId: getCartById
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+    put: #put
+      tags:
+        - Carts
+      summary: Update cart by id
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+      operationId: updateCartById
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                productId:
+                  type: string
+                quantity:
+                  type: number
+              example:
+                products:
+                - productId: 64bee9d54f723c86390233e8
+                  quantity: 2
+                - productId: 64bee9d54f723c86390233e8
+                  quantity: 1
+      responses:
+        '200':
+          description: Updated
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+    delete: #delete
+      tags:
+        - Carts
+      summary: Delete cart by id
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+      operationId: deleteCartById
+      responses:
+        '200':
+          description: Deleted
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+  /api/carts/{cid}/detail: #/api/carts/{cid}/detail
+    get: #get
+      tags:
+        - Carts
+      summary: Get cart detail by id (includes order detail)
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+      operationId: getCartDetailById
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+
+components:
+  schemas:
+    Cart: #/components/schemas/cart
+      type: object
+      properties:
+        _id:
+          type: string
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              productId:
+                type: string
+              quantity:
+                type: number
+            example:
+              _id: 64cdc3e4aaa89c13dbb33c02
+              products:
+              - productId: 64bee9d54f723c86390233e8
+                quantity: 2
+              - productId: 64bee9d54f723c86390233e8
+                quantity: 1

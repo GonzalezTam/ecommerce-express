@@ -1,0 +1,270 @@
+paths:
+  /api/products: #/api/products
+    get: #get
+      tags:
+        - Products
+      summary: Get all products
+      parameters:
+        - in: query
+          name: price
+          schema:
+            type: number
+          description: Product price
+        - in: query
+          name: limit
+          schema:
+            type: integer || string
+          description: Number of products per page
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Product category
+        - in: query
+          name: status
+          schema:
+            type: boolean
+          description: Product status
+      operationId: getAllProducts
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+    post: #post
+      tags:
+        - Products
+      summary: Create a new product
+      operationId: createProduct
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#components/schemas/CreateUpdateProduct'
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+  /api/products/manager: #/api/products/manager
+    get: #get
+      tags:
+        - Products
+      summary: Get all products for product manager
+      parameters:
+        - in: query
+          name: price
+          schema:
+            type: number
+          description: Product price
+        - in: query
+          name: limit
+          schema:
+            type: integer
+          description: Number of products per page
+        - in: query
+          name: category
+          schema:
+            type: string
+          description: Product category
+        - in: query
+          name: status
+          schema:
+            type: boolean
+          description: Product status
+      operationId: getAllProductsManager
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+
+  /api/products/{id}: #/api/products/{id}
+    get: #get
+      tags:
+        - Products
+      summary: Get a product by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          description: Product id
+      operationId: getProductById
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Product not found
+        '500':
+          description: Internal Server Error
+    put: #put
+      tags:
+        - Products
+      summary: Update a product by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          description: Product id
+      operationId: updateProductById
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#components/schemas/CreateUpdateProduct'
+      responses:
+        '200':
+          description: Updated
+        '400':
+          description: Bad Request
+        '404':
+          description: Product not found
+        '500':
+          description: Internal Server Error
+    delete: #delete
+      tags:
+        - Products
+      summary: Delete a product by id
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          description: Product id
+      operationId: deleteProductById
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Product not found
+        '500':
+          description: Internal Server Error'
+
+  /api/products/purchase/{cid}: #/api/products/purchase/{cid}
+    put:
+      tags:
+        - Products
+      summary: Purchase products from cart and subtract stock
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+      operationId: purchaseProducts
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Cart not found
+        '500':
+          description: Internal Server Error
+
+components:
+  schemas:
+    Product: #/components/schemas/Product'
+      type: object
+      properties:
+        _id:
+          type: string
+          unique: true
+        owner:
+          type: string
+          default: admin
+        title:
+          type: string
+        category:
+          type: string
+        code:
+          type: string
+          unique: true
+        description:
+          type: string
+        price:
+          type: number
+        stock:
+          type: number
+        status:
+          type: boolean
+        thumbnails:
+          type: array
+          items:
+            type: string
+      required:
+        - owner
+        - title
+        - category
+        - code
+        - description
+        - price
+        - stock
+        - status
+        - thumbnails
+      example:
+        _id: 64bee9d54f723c86390233e8
+        title: Iphone 12 Pro Max
+        category: Phones
+        code: xxx-123-xxx
+        description: 128GB of storage and 6GB of RAM, 6.7" screen and 12MP camera
+        owner: seller@mail.com
+        price: 1200
+        stock: 10
+        status: true
+        thumbnails:
+          - https://picsum.photos/200/300
+          - https://picsum.photos/200/300
+
+    CreateUpdateProduct: #/components/schemas/CreateUpdateProduct'
+      type: object
+      properties:
+        title:
+          type: string
+        category:
+          type: string
+        code:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+        stock:
+          type: number
+        status:
+          type: boolean
+        thumbnails:
+          type: array
+          items:
+            type: string
+      required:
+        - title
+        - category
+        - code
+        - description
+        - price
+        - stock
+        - status
+        - thumbnails
+      example:
+        title: Iphone 12 Pro Max
+        category: Phones
+        code: xxx-123-xxx
+        description: 128GB of storage and 6GB of RAM, 6.7" screen and 12MP camera
+        price: 1200
+        stock: 10
+        status: true
+        thumbnails: []

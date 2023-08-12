@@ -32,7 +32,7 @@ const getAllUsersManager = async (req) => {
       users = users.map((user) => userDTO(user));
 
       const resObj = {
-        status: 'success',
+        status: 200,
         payload: users,
         count: users.length
       };
@@ -52,7 +52,7 @@ const getAllUsersManager = async (req) => {
     }
 
     const resObj = {
-      status: 'success',
+      status: 200,
       payload: users.docs,
       totalPages: users.totalPages,
       prevPage: users.prevPage,
@@ -69,7 +69,7 @@ const getAllUsersManager = async (req) => {
     return resObj;
   } catch (error) {
     const resObj = {
-      status: 'error',
+      status: 400,
       message: 'There was an error while querying the database',
       payload: [],
       totalPages: 0,

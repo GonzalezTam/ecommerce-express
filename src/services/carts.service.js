@@ -98,7 +98,7 @@ const createCart = async (req) => {
   try {
     const cart = await cartModel.create({ products });
     req.log.info(`[carts-createCart] cart ${cart._id} created`);
-    return { status: 200, cartCreated: cart };
+    return { status: 201, cartCreated: cart };
   } catch (error) {
     req.log.error(`[carts-createCart] ${error.message}`);
     return { status: 400, error: error.message };
