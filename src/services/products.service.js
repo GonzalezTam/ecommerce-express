@@ -20,7 +20,7 @@ const getAllProducts = async (req) => {
     if (limit === 'all' || limit > 0) {
       const products = limit === 'all' ? await productModel.find(query).lean().exec() : await productModel.find(query).limit(parseInt(limit)).lean().exec();
       const resObj = {
-        status: 'success',
+        status: 200,
         payload: products,
         count: products.length
       };
@@ -39,7 +39,7 @@ const getAllProducts = async (req) => {
     }
 
     const resObj = {
-      status: 'success',
+      status: 200,
       payload: products.docs,
       totalPages: products.totalPages,
       prevPage: products.prevPage || null,
@@ -56,7 +56,7 @@ const getAllProducts = async (req) => {
     return resObj;
   } catch (error) {
     const resObj = {
-      status: 'error',
+      status: 400,
       message: 'There was an error while querying the database',
       payload: [],
       totalPages: 0,
@@ -97,7 +97,7 @@ const getAllProductsManager = async (req) => {
     if (limit === 'all' || limit > 0) {
       const products = limit === 'all' ? await productModel.find(query).lean().exec() : await productModel.find(query).limit(parseInt(limit)).lean().exec();
       const resObj = {
-        status: 'success',
+        status: 200,
         payload: products,
         count: products.length
       };
@@ -116,7 +116,7 @@ const getAllProductsManager = async (req) => {
     }
 
     const resObj = {
-      status: 'success',
+      status: 200,
       payload: products.docs,
       totalPages: products.totalPages,
       prevPage: products.prevPage || null,
@@ -133,7 +133,7 @@ const getAllProductsManager = async (req) => {
     return resObj;
   } catch (error) {
     const resObj = {
-      status: 'error',
+      status: 400,
       message: 'There was an error while querying the database',
       payload: [],
       totalPages: 0,
@@ -219,6 +219,7 @@ const updateProduct = async (req) => {
     // if the user is not admin, he can only update his own products
     const userUpdating = req.session.user.role === 'admin' ? 'admin' : req.user.email;
     const toUpdateProduct = await productModel.findOne({ _id: id }).lean().exec();
+    const findProductByCode = await productModel.findOne({ code: req.body.code }).lean().exec();
     if (userUpdating !== 'admin' && userUpdating !== toUpdateProduct.owner) { return { error: 'You are not authorized to perform this action', status: 401 }; }
     if (req.body.id) {
       const result = { error: 'ID must not be provided', status: 400 };
@@ -230,7 +231,11 @@ const updateProduct = async (req) => {
       req.log.error('[products-updateProduct] Invalid parameters');
       return result;
     }
-
+    if (req.body.code === findProductByCode?.code) {
+      const result = { error: 'A product with this code already exists', status: 400 };
+      req.log.error('[products-updateProduct] Code already exists');
+      return result;
+    }
     const product = {
       ...toUpdateProduct,
       title: req.body.title ? req.body.title : toUpdateProduct.title,

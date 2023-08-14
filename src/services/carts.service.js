@@ -1,4 +1,5 @@
 import cartModel from '../dao/models/cart.model.js';
+import productModel from '../dao/models/product.model.js';
 
 const getAllCarts = async (req) => {
   try {
@@ -98,14 +99,94 @@ const createCart = async (req) => {
   try {
     const cart = await cartModel.create({ products });
     req.log.info(`[carts-createCart] cart ${cart._id} created`);
-    return { status: 200, cartCreated: cart };
+    return { status: 201, cartCreated: cart };
   } catch (error) {
     req.log.error(`[carts-createCart] ${error.message}`);
     return { status: 400, error: error.message };
   }
 };
 
-// Todo create remaining services.
+const addProductToCart = async (req) => {
+  const user = req.session.user;
+  const cartId = req.params.cid;
+  const productId = req.params.pid;
+  const quantity = 0;
+
+  if (!req.params.cid) return { status: 400, error: 'No Cart ID provided' };
+  if (!req.params.pid) return { status: 400, error: 'No Product ID provided' };
+
+  try {
+    const product = await productModel.findOne({ _id: productId }).lean().exec();
+    if (user.email === product?.owner) { return { status: 400, error: 'You cannot add your own product to your cart' }; }
+
+    const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
+    const productInCart = Object.values(cart.products).some(product => product.productId === productId);
+    if (!productInCart) {
+      const updatedCart = await cartModel.findOneAndUpdate({ _id: cartId }, { $push: { products: { productId, quantity: quantity + 1 } } }).lean().exec();
+      req.log.info(`[carts-addProductToCart] product ${productId} added to cart ${cartId} successfully`);
+      return { status: 200, updatedCart };
+    } else {
+      const updatedCart = await cartModel.updateOne({ _id: cartId, 'products.productId': productId }, { $inc: { 'products.$.quantity': 1 } }).lean().exec();
+      req.log.info(`[carts-addProductToCart] product ${productId} quantity updated in cart ${cartId} successfully`);
+      return { status: 200, updatedCart };
+    }
+  } catch (error) {
+    req.log.error(`[carts-addProductToCart] ${error.message}`);
+    return { status: 400, error: error.message };
+  }
+};
+
+const updateProductQuantity = async (req) => {
+  const cartId = req.params.cid;
+  const productId = req.params.pid;
+  const quantity = +req.body.quantity;
+
+  if (!req.params.cid) return { status: 400, error: 'No Cart ID provided' };
+  if (!req.params.pid) return { status: 400, error: 'No Product ID provided' };
+  if (!req.body.quantity || isNaN(req.body.quantity)) return { status: 400, error: 'Quantity is not a number' };
+
+  try {
+    const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
+    const productInCart = Object.values(cart.products).some(product => product.productId === productId);
+    if (!productInCart) {
+      req.log.error(`[carts-updateProductQuantity] product ${productId} not in cart ${cartId}`);
+      return { status: 404, error: 'Product not in cart' };
+    } else {
+      const updatedCart = await cartModel.updateOne({ _id: cartId, 'products.productId': productId }, { $set: { 'products.$.quantity': quantity } }).lean().exec();
+      req.log.info(`[carts-updateProductQuantity] product ${productId} quantity updated in cart ${cartId} successfully`);
+      return { status: 200, updatedCart };
+    }
+  } catch (error) {
+    req.log.error(`[carts-updateProductQuantity] ${error.message}`);
+    return { status: 400, error: error.message };
+  }
+};
+
+const removeProductFromCart = async (req) => {
+  const cartId = req.params.cid;
+  const productId = req.params.pid;
+  try {
+    const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
+    const productInCart = Object.values(cart.products).find(product => product.productId === productId);
+    if (!productInCart) {
+      req.log.error(`[carts-removeProductFromCart] product ${productId} not in cart ${cartId}`);
+      return { status: 404, error: 'Product not in cart' };
+    } else {
+      if (productInCart.quantity === 1) { // if quantity is 1, remove product from cart
+        const updatedCart = await cartModel.updateOne({ _id: cartId }, { $pull: { products: { productId } } }).lean().exec();
+        req.log.info(`[carts-removeProductFromCart] product ${productId} removed from cart ${cartId} successfully`);
+        return { status: 200, productRemoved: updatedCart };
+      } else { // if quantity is greater than 1, decrement quantity
+        const updatedCart = await cartModel.updateOne({ _id: cartId, 'products.productId': productId }, { $inc: { 'products.$.quantity': -1 } }).lean().exec();
+        req.log.info(`[carts-removeProductFromCart] product ${productId} quantity updated in cart ${cartId} successfully`);
+        return { status: 200, productRemoved: updatedCart };
+      }
+    }
+  } catch (error) {
+    req.log.error(`[carts-removeProductFromCart] ${error.message}`);
+    return { status: 400, error: error.message };
+  }
+};
 
 export const cartsService = {
   getAllCarts,
@@ -113,5 +194,8 @@ export const cartsService = {
   getCheckoutDetail,
   updateCartById,
   deleteCartById,
-  createCart
+  createCart,
+  addProductToCart,
+  updateProductQuantity,
+  removeProductFromCart
 };

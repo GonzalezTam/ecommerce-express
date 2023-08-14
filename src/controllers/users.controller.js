@@ -2,12 +2,12 @@ import { usersService } from '../services/users.service.js';
 
 const getAllUsers = async (req, res) => {
   const result = await usersService.getAllUsers();
-  res.send({ users: result });
+  res.status(result.status).send({ users: result });
 };
 
 const getAllUsersManager = async (req, res) => {
   const result = await usersService.getAllUsersManager(req);
-  res.send({ users: result });
+  res.status(result.status).send({ users: result });
 };
 
 const updateUser = async (req, res) => {

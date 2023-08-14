@@ -4,6 +4,8 @@ import session from 'express-session';
 import loggerMiddleware from './middlewares/logger.js';
 import log from './utils/logger/logger.js';
 import MongoStore from 'connect-mongo';
+import swaggerUi from 'swagger-ui-express';
+import specs from './config/docs.config.js';
 import passport from 'passport';
 import initializePassport from './config/passport.config.js';
 import dotEnvConfig from './config/env.config.js';
@@ -46,6 +48,7 @@ try {
   initializePassport();
   app.use(passport.initialize());
   app.use(passport.session());
+  app.use('/docs', swaggerUi.serve, swaggerUi.setup(specs));
   app.use('/api', apiRouter);
   app.use('/', viewsRouter);
 
