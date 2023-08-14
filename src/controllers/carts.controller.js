@@ -30,13 +30,31 @@ const createCart = async (req, res) => {
   res.status(result.status).send(result);
 };
 
+const addProductToCart = async (req, res) => {
+  const result = await cartsService.addProductToCart(req);
+  res.status(result.status).send(result);
+};
+
+const updateProductQuantity = async (req, res) => {
+  const result = await cartsService.updateProductQuantity(req);
+  res.status(result.status).send(result);
+};
+
+const removeProductFromCart = async (req, res) => {
+  const result = await cartsService.removeProductFromCart(req);
+  res.status(result.status).send(result);
+};
+
 const cartsController = {
   getAllCarts,
   getCartById,
   getCartDetailById,
   updateCartById,
   deleteCartById,
-  createCart
+  createCart,
+  addProductToCart,
+  updateProductQuantity,
+  removeProductFromCart
 };
 
 export default cartsController;

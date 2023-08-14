@@ -52,6 +52,7 @@ paths:
           schema:
             type: string
           description: Cart id
+          required: true
       operationId: getCartById
       responses:
         '200':
@@ -72,6 +73,7 @@ paths:
           schema:
             type: string
           description: Cart id
+          required: true
       operationId: updateCartById
       requestBody:
         content:
@@ -108,6 +110,7 @@ paths:
           schema:
             type: string
           description: Cart id
+          required: true
       operationId: deleteCartById
       responses:
         '200':
@@ -130,10 +133,104 @@ paths:
           schema:
             type: string
           description: Cart id
+          required: true
       operationId: getCartDetailById
       responses:
         '200':
           description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+
+  /api/carts/{cid}/products/{pid}: #/api/carts/{cid}/products/{pid}
+    post: #post
+      tags:
+        - Carts
+      summary: Add product to cart
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+          required: true
+        - in: path
+          name: pid
+          schema:
+            type: string
+          description: Product id
+          required: true
+      operationId: addProductToCart
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+    put: #put
+      tags:
+        - Carts
+      summary: Update product in cart
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+          required: true
+        - in: path
+          name: pid
+          schema:
+            type: string
+          description: Product id
+          required: true
+      operationId: updateProductInCart
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                quantity:
+                  type: number
+              example:
+                quantity: 2
+      responses:
+        '200':
+          description: Updated
+        '400':
+          description: Bad Request
+        '404':
+          description: Not Found
+        '500':
+          description: Internal Server Error
+    delete: #delete
+      tags:
+        - Carts
+      summary: Delete product from cart
+      parameters:
+        - in: path
+          name: cid
+          schema:
+            type: string
+          description: Cart id
+          required: true
+        - in: path
+          name: pid
+          schema:
+            type: string
+          description: Product id
+          required: true
+      operationId: deleteProductFromCart
+      responses:
+        '200':
+          description: Deleted
         '400':
           description: Bad Request
         '404':

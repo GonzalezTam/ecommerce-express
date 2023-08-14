@@ -97,6 +97,7 @@ paths:
           schema:
             type: string
           description: Product id
+          required: true
       operationId: getProductById
       responses:
         '200':
@@ -117,6 +118,7 @@ paths:
           schema:
             type: string
           description: Product id
+          required: true
       operationId: updateProductById
       requestBody:
         content:
@@ -142,6 +144,7 @@ paths:
           schema:
             type: string
           description: Product id
+          required: true
       operationId: deleteProductById
       responses:
         '200':
@@ -164,6 +167,7 @@ paths:
           schema:
             type: string
           description: Cart id
+          required: true
       operationId: purchaseProducts
       responses:
         '200':
