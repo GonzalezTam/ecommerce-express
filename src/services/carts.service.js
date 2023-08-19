@@ -33,11 +33,11 @@ const getCheckoutDetail = async (req) => {
         return {
           ...p.productId,
           quantity: p.quantity,
-          subtotal: (p.productId.stock !== 0) ? p.quantity * p.productId.price : 0,
+          subtotal: (p.productId.stock !== 0) && (p.quantity <= p.productId.stock) ? p.quantity * p.productId.price : 0,
           notEnoughStockWarning: (p.productId.stock !== 0 && p.quantity > p.productId.stock) ? `There are only ${p.productId.stock} units left` : false
         };
       }),
-      outOfStockFlag: products.some(p => p.productId.stock === 0)
+      outOfStockFlag: products.some(p => p.productId.stock === 0) || products.some(p => p.quantity > p.productId.stock)
     };
 
     const shippingPrice = 0; // hardcode shipping price

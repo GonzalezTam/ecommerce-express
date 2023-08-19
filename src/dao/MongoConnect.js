@@ -1,10 +1,11 @@
 import log from '../utils/logger/logger.js';
 import mongoose from 'mongoose';
 
-const mongoConnection = async (MONGO_URI) => {
+const mongoConnection = async (MONGO_URI, MONGO_DB) => {
   try {
+    const URI = MONGO_URI + MONGO_DB;
     mongoose.set('strict', false);
-    await mongoose.connect(MONGO_URI, {
+    await mongoose.connect(URI, {
       serverSelectionTimeoutMS: 5000
     });
     log.info('Connected to database');
