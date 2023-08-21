@@ -1,5 +1,8 @@
+import dotEnvConfig from '../config/env.config.js';
 import productModel from '../dao/models/product.model.js';
 import { cartsService } from '../services/carts.service.js';
+
+const { ENVIRONMENT } = dotEnvConfig;
 
 const getAllProducts = async (req) => {
   try {
@@ -171,7 +174,9 @@ const getProductsById = async (req) => {
 };
 
 const createProduct = async (req) => {
-  if (req.session.user.role === 'user') { return { error: 'You are not authorized to perform this action', status: 401 }; }
+  if (ENVIRONMENT !== 'test' && req.session.user.role === 'user') { return { error: 'You are not authorized to perform this action', status: 401 }; }
+  // In production, only admins and premium users can create products.
+  //  For testing purposes the endpoint is not protected (products go to testing database)
 
   if (req.body.id || req.body._id) {
     const result = { error: 'ID must not be provided', status: 400 };
@@ -190,7 +195,7 @@ const createProduct = async (req) => {
   }
 
   const product = {
-    owner: req.session.user.role === 'admin' ? 'admin' : req.user.email,
+    owner: (ENVIRONMENT === 'test' && req.body.owner) || req.session.user.role === 'admin' ? 'admin' : req.user.email,
     title: req.body.title,
     description: req.body.description,
     price: req.body.price,
@@ -216,11 +221,12 @@ const createProduct = async (req) => {
 const updateProduct = async (req) => {
   const id = req.params.id;
   try {
+    // For testing purposes the endpoint is not protected (products go to testing database)
     // if the user is not admin, he can only update his own products
-    const userUpdating = req.session.user.role === 'admin' ? 'admin' : req.user.email;
+    const userUpdating = ENVIRONMENT !== 'test' ? (req.session.user.role === 'admin' ? 'admin' : req.user.email) : 'admin'; // if ENVIRONMENT is test, the user is 'admin
     const toUpdateProduct = await productModel.findOne({ _id: id }).lean().exec();
     const findProductByCode = await productModel.findOne({ code: req.body.code }).lean().exec();
-    if (userUpdating !== 'admin' && userUpdating !== toUpdateProduct.owner) { return { error: 'You are not authorized to perform this action', status: 401 }; }
+    if (ENVIRONMENT !== 'test' && (userUpdating !== 'admin' && userUpdating !== toUpdateProduct.owner)) { return { error: 'You are not authorized to perform this action', status: 401 }; }
     if (req.body.id) {
       const result = { error: 'ID must not be provided', status: 400 };
       req.log.error('[products-updateProduct] ID provided');
@@ -231,7 +237,7 @@ const updateProduct = async (req) => {
       req.log.error('[products-updateProduct] Invalid parameters');
       return result;
     }
-    if (req.body.code === findProductByCode?.code) {
+    if ((req.body.code && req.body.code === findProductByCode?.code) && (req.body.code !== toUpdateProduct.code)) {
       const result = { error: 'A product with this code already exists', status: 400 };
       req.log.error('[products-updateProduct] Code already exists');
       return result;
@@ -322,10 +328,12 @@ const updateProductsStockByOrder = async (req, res) => {
 const deleteProduct = async (req) => {
   const id = req.params.id;
   try {
+    // For testing purposes the endpoint is not protected (products go to testing database)
+    // if the user is not admin, he can only delete his own products
     // check if the user is authorized to delete the product
-    const userDeleting = req.session.user.role === 'admin' ? 'admin' : req.user.email;
+    const userDeleting = ENVIRONMENT !== 'test' ? (req.session.user.role === 'admin' ? 'admin' : req.user.email) : 'admin'; // if ENVIRONMENT is test, the user is 'admin
     const toDeleteProduct = await productModel.findOne({ _id: id }).lean().exec();
-    if (userDeleting !== 'admin' && userDeleting !== toDeleteProduct.owner) { return { error: 'You are not authorized to perform this action', status: 401 }; }
+    if (ENVIRONMENT !== 'test' && (userDeleting !== 'admin' && userDeleting !== toDeleteProduct.owner)) { return { error: 'You are not authorized to perform this action', status: 401 }; }
 
     // delete the product
     const deletedProduct = await productModel.deleteOne({ _id: id });

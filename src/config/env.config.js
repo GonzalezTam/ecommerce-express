@@ -11,8 +11,7 @@ const ENVIRONMENT = mode;
 const PORT = process.env.PORT || 3000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 3001;
 const MONGO_URI = process.env.MONGO_URI;
-const MONGO_DB_TEST = process.env.MONGO_DB_TEST;
-const MONGO_DB_PROD = process.env.MONGO_DB_PROD;
+const MONGO_DB = mode === 'test' ? process.env.MONGO_DB_TEST : process.env.MONGO_DB_PROD;
 const MONGO_DB_SESSION = process.env.MONGO_DB_SESSION;
 const SECRET = process.env.SECRET;
 
@@ -31,8 +30,7 @@ const dotEnvConfig = {
   PORT,
   SOCKET_PORT,
   MONGO_URI,
-  MONGO_DB_TEST,
-  MONGO_DB_PROD,
+  MONGO_DB,
   MONGO_DB_SESSION,
   SECRET,
   GITHUB_CLIENT_ID,
@@ -42,7 +40,7 @@ const dotEnvConfig = {
   ADMIN_PASSWORD,
   GMAIL_USER,
   GMAIL_PASSWORD,
-  DB_CONNECT: async () => await mongoConnection(MONGO_URI, MONGO_DB_PROD)
+  DB_CONNECT: async () => await mongoConnection(MONGO_URI, MONGO_DB)
 };
 
 // Export module
