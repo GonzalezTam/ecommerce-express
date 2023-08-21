@@ -18,6 +18,9 @@ const product = {
 
 describe('Test /api/products', () => {
   describe('Create a new product', () => {
+    it('-Product _id should not be provided', async () => {
+      expect(product).to.not.have.property('_id');
+    });
     it('-should return 201 status code', async () => {
       const response = await requester.post('/api/products').send(product);
       expect(response.status).to.be.equal(201);
@@ -25,14 +28,19 @@ describe('Test /api/products', () => {
   });
   describe('Get all products', () => {
     it('-should return 200 status code', async () => {
-      const response = await requester.get('/api/products');
+      const response = await requester.get('/api/products?limit=all');
       expect(response.status).to.be.equal(200);
+    });
+    it('-products response should return a payload', async () => {
+      const response = await requester.get('/api/products?limit=all');
+      expect(response.body.products).to.have.property('payload');
     });
   });
   describe('Get a product by ID', () => {
     it('-should return 200 status code', async () => {
-      const getProducts = await requester.get('/api/products');
-      const productId = getProducts.body.products.payload[0]._id; // get the last product ID
+      const getProducts = await requester.get('/api/products?limit=all');
+      const products = getProducts.body.products.payload;
+      const productId = products[products.length - 1]._id; // get the last product ID
       // test the endpoint with first product ID from the database
       const response = await requester.get(`/api/products/${productId}`); // use the last product ID
       expect(response.status).to.be.equal(200);
@@ -40,8 +48,9 @@ describe('Test /api/products', () => {
   });
   describe('Update a product by ID', () => {
     it('-should return 200 status code', async () => {
-      const getProducts = await requester.get('/api/products');
-      const productId = getProducts.body.products.payload[0]._id; // get the last product ID
+      const getProducts = await requester.get('/api/products?limit=all');
+      const products = getProducts.body.products.payload;
+      const productId = products[products.length - 1]._id; // get the last product ID
       // test the endpoint with first product ID from the database
       const response = await requester.put(`/api/products/${productId}`).send({
         price: faker.number.float(),
@@ -54,7 +63,7 @@ describe('Test /api/products', () => {
   });
   describe('Delete a product by ID', () => {
     it('-should return 200 status code', async () => {
-      const getProducts = await requester.get('/api/products');
+      const getProducts = await requester.get('/api/products?limit=all');
       const products = getProducts.body.products.payload;
       const productId = products[products.length - 1]._id; // get the last product ID
       // test the endpoint with the last product ID from the database (the one we just created)

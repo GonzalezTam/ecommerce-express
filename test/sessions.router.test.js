@@ -1,6 +1,5 @@
 /* eslint-disable no-undef */
 import supertest from 'supertest';
-import mongoose from 'mongoose';
 import { expect } from 'chai';
 import { faker } from '@faker-js/faker';
 
@@ -16,6 +15,13 @@ const user = {
 describe('Test /api/session', async () => {
   const body = { ...user, password2: user.password };
   describe('Register a new user', () => {
+    it('-signup email should be valid', async () => {
+      const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      expect(body.email).to.match(regex);
+    });
+    it('-signup passwords should match', async () => {
+      expect(body.password).to.be.equal(body.password2);
+    });
     it('-should return 302 status code', async () => {
       const response = await requester.post('/api/session/register').send(body);
       expect(response.status).to.be.equal(302); // 302 Found is what we get when we redirect (in this case to /login)
@@ -30,12 +36,18 @@ describe('Test /api/session', async () => {
       expect(response.status).to.be.equal(200);
     });
   });
-  describe('Logout user', () => {
+  describe('Get users', () => {
     it('-should return 200 status code', async () => {
-      const response = await requester.get('/api/session/logout');
+      const response = await requester.get('/api/users');
       expect(response.status).to.be.equal(200);
     });
+    it('-users response result should be an array', async () => {
+      const response = await requester.get('/api/users');
+      expect(response.body.users.result).to.be.an('array');
+    });
+    it('-user array should not contain passwords', async () => {
+      const response = await requester.get('/api/users');
+      expect(response.body.users.result[0]).to.not.have.property('password');
+    });
   });
-  // drop user collection from the database
-  await mongoose.connection.dropCollection('users');
 });

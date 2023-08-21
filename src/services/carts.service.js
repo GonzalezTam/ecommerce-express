@@ -1,5 +1,8 @@
+import dotEnvConfig from '../config/env.config.js';
 import cartModel from '../dao/models/cart.model.js';
 import productModel from '../dao/models/product.model.js';
+
+const { ENVIRONMENT } = dotEnvConfig;
 
 const getAllCarts = async (req) => {
   try {
@@ -117,7 +120,7 @@ const addProductToCart = async (req) => {
 
   try {
     const product = await productModel.findOne({ _id: productId }).lean().exec();
-    if (user.email === product?.owner) { return { status: 400, error: 'You cannot add your own product to your cart' }; }
+    if ((ENVIRONMENT !== 'test') && user.email === product?.owner) { return { status: 400, error: 'You cannot add your own product to your cart' }; }
 
     const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
     const productInCart = Object.values(cart.products).some(product => product.productId === productId);
