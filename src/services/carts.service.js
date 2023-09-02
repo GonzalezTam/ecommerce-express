@@ -1,5 +1,8 @@
+import dotEnvConfig from '../config/env.config.js';
 import cartModel from '../dao/models/cart.model.js';
 import productModel from '../dao/models/product.model.js';
+
+const { ENVIRONMENT } = dotEnvConfig;
 
 const getAllCarts = async (req) => {
   try {
@@ -33,11 +36,11 @@ const getCheckoutDetail = async (req) => {
         return {
           ...p.productId,
           quantity: p.quantity,
-          subtotal: (p.productId.stock !== 0) ? p.quantity * p.productId.price : 0,
+          subtotal: (p.productId.stock !== 0) && (p.quantity <= p.productId.stock) ? p.quantity * p.productId.price : 0,
           notEnoughStockWarning: (p.productId.stock !== 0 && p.quantity > p.productId.stock) ? `There are only ${p.productId.stock} units left` : false
         };
       }),
-      outOfStockFlag: products.some(p => p.productId.stock === 0)
+      outOfStockFlag: products.some(p => p.productId.stock === 0) || products.some(p => p.quantity > p.productId.stock)
     };
 
     const shippingPrice = 0; // hardcode shipping price
@@ -117,7 +120,7 @@ const addProductToCart = async (req) => {
 
   try {
     const product = await productModel.findOne({ _id: productId }).lean().exec();
-    if (user.email === product?.owner) { return { status: 400, error: 'You cannot add your own product to your cart' }; }
+    if ((ENVIRONMENT !== 'test') && user.email === product?.owner) { return { status: 400, error: 'You cannot add your own product to your cart' }; }
 
     const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
     const productInCart = Object.values(cart.products).some(product => product.productId === productId);

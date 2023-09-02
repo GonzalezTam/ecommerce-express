@@ -1,6 +1,7 @@
 import bodyParser from 'body-parser';
 import express from 'express';
 import session from 'express-session';
+import cors from 'cors';
 import loggerMiddleware from './middlewares/logger.js';
 import log from './utils/logger/logger.js';
 import MongoStore from 'connect-mongo';
@@ -25,6 +26,7 @@ const app = express();
 try {
   DB_CONNECT();
   const httpServer = app.listen(PORT, () => log.info(`Server is running on port ${PORT}`));
+  app.use(cors());
   app.use(loggerMiddleware);
   app.use(express.json());
   app.use(express.static('./src/public'));
