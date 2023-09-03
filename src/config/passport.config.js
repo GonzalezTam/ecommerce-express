@@ -40,6 +40,7 @@ const initializePassport = () => {
       const user = await userModel.findOne({ email: username }).lean().exec();
       if (!user) return done(null, user); // user not found
       if (!isValidPassword(user, password)) return done(null, false); // invalid password
+      await userModel.findOneAndUpdate({ email: username }, { last_connection: new Date() });
       return done(null, user); // success
     } catch (err) {
       return done('Error: ' + err); // server error
@@ -58,7 +59,10 @@ const initializePassport = () => {
     const email = profile._json.email || profile.emails[0].value;
     try {
       const user = await userModel.findOne({ email }).lean().exec();
-      if (user) return done(null, user); // user found, return that user.
+      if (user) {
+        await userModel.findOneAndUpdate({ email }, { last_connection: new Date() });
+        return done(null, user); // user found, return that user.
+      }
       const cart = await cartModel.create({}); // create empty cart for new user
       const newUser = await userModel.create({
         firstName: name,
@@ -67,7 +71,8 @@ const initializePassport = () => {
         age: 0,
         cart: cart._id,
         password: createHash(email), // use email as password
-        role: 'user'
+        role: 'user',
+        last_connection: new Date()
       });
       return done(null, newUser); // create new user with github account
     } catch (err) {

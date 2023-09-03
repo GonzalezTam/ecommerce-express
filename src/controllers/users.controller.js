@@ -48,8 +48,48 @@ const deleteUser = async (req, res) => {
   }
 };
 
+const updateUserPremium = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const result = await usersService.updateUserPremium(userId);
+    req.log.info(`[users-updateUserPremium] ${result.message}`);
+    return res.status(result.status).send(result);
+  } catch (error) {
+    req.log.error(`[users-updateUserPremium] ${error.message}`);
+    return res.status(400).send({ status: 'error', message: error.message });
+  }
+};
+
+const getUserDocuments = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const result = await usersService.getUserDocuments(userId);
+    req.log.info(`[users-getUserDocuments] ${result.message}`);
+    return res.status(result.status).send(result);
+  } catch (error) {
+    req.log.error(`[users-getUserDocuments] ${error.message}`);
+    return res.status(400).send({ status: 'error', message: error.message });
+  }
+};
+
+const uploadDocuments = async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const documents = req.files;
+    const result = await usersService.uploadDocuments(userId, documents);
+    if (result.status === 200) {
+      req.user.documents = result.documents;
+    }
+    req.log.info(`[users-uploadDocuments] ${result.message}`);
+    return res.status(result.status).send(result);
+  } catch (error) {
+    req.log.error(`[users-uploadDocuments] ${error.message}`);
+    return res.status(400).send({ status: 'error', message: error.message });
+  }
+};
+
 // TODO: implement this
-const deleteInactiveUsers = async (req, res) => {};
+const deleteInactiveUsers = async (req, res) => { };
 
 const usersController = {
   getAllUsers,
@@ -57,6 +97,9 @@ const usersController = {
   updateUser,
   updateUserCart,
   deleteUser,
+  updateUserPremium,
+  getUserDocuments,
+  uploadDocuments,
   deleteInactiveUsers
 };
 

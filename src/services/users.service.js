@@ -1,5 +1,7 @@
+/* eslint-disable camelcase */
 /* eslint-disable no-unused-vars */
 import { userDTO } from '../dto/user.dto.js';
+import { documentsDto } from '../dto/documents.dto.js';
 import cartModel from '../dao/models/cart.model.js';
 import userModel from '../dao/models/user.model.js';
 
@@ -122,8 +124,69 @@ const deleteUser = async (userId) => {
   }
 };
 
+const updateUserPremium = async (userId) => {
+  try {
+    const findUser = await userModel.findById(userId);
+    if (findUser.role === 'user' && findUser.documents.length < 3) {
+      return { status: 400, message: 'User did not provide enough documents to be upgraded to premium' };
+    }
+    const newRole = findUser.role === 'user' ? 'premium' : 'user';
+    await userModel.findByIdAndUpdate(userId, { role: newRole }, { new: true });
+    return { status: 200, message: `User role updated to ${newRole}` };
+  } catch (error) {
+    return { status: 404, message: 'User not found' };
+  }
+};
+
+const uploadDocuments = async (userId, documents) => {
+  try {
+    const user = await userModel.findById(userId);
+    // Gets the user documents
+    const userDocuments = user.documents;
+
+    // Maps the uploaded documents to the user documents format
+    const uploadedDocuments = Object.keys(documents).map((key) => {
+      const document = documents[key];
+      const { fieldname, originalname, path } = document[0];
+      return { fieldname, name: originalname, reference: path };
+    });
+
+    // Checks if there are repeated documents and replaces them with the new ones
+    const finalDocumentsNotRepeated = [
+      ...userDocuments,
+      ...uploadedDocuments
+    ].reduce((acc, curr) => {
+      const repeated = acc.find((doc) => doc.fieldname === curr.fieldname);
+      if (!repeated) {
+        acc.push(curr);
+      } else {
+        const repeatedIndex = acc.findIndex((doc) => doc.fieldname === curr.fieldname);
+        acc[repeatedIndex] = curr;
+      }
+      return acc;
+    }, []);
+
+    const result = await userModel.findOneAndUpdate({ _id: userId }, { documents: finalDocumentsNotRepeated }, { new: true });
+    // if the user has the required documents, it will update the role to premium
+    if (result.documents.length === 3) { await updateUserPremium(userId); }
+    return { status: 200, documents: documentsDto(result.documents), message: `Updated documents for user ${userId}` };
+  } catch (error) {
+    return { status: 404, message: error };
+  }
+};
+
+const getUserDocuments = async (userId) => {
+  try {
+    const user = await userModel.findById(userId);
+    const documents = documentsDto(user.documents);
+    return { status: 200, documents };
+  } catch (error) {
+    return { status: 404, message: error };
+  }
+};
+
 // TODO: implement this
-const deleteInactiveUsers = async () => {};
+const deleteInactiveUsers = async () => { };
 
 export const usersService = {
   getAllUsers,
@@ -131,5 +194,8 @@ export const usersService = {
   updateUser,
   updateUserCart,
   deleteUser,
+  updateUserPremium,
+  uploadDocuments,
+  getUserDocuments,
   deleteInactiveUsers
 };

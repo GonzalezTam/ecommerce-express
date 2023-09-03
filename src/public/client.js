@@ -56,6 +56,10 @@ const stock = document.getElementById('stock');
 const code = document.getElementById('code');
 const productsManagerPanel = document.getElementById('productsManagerPanel-button');
 const usersManagerPanel = document.getElementById('usersManager-button');
+const document_input_id = document.getElementById('document_id');
+const document_input_address = document.getElementById('document_address');
+const document_input_bank = document.getElementById('document_bank');
+const submitDocuments = document.getElementById('submit-documents');
 
 document.addEventListener('click', function (e) {
   if (e.target.matches('.remove-product')) delete_product(e.target.dataset.id);
@@ -74,6 +78,24 @@ document.addEventListener('click', function (e) {
   if (e.target.matches('#usersManager-button')) {
     e.preventDefault();
     document.location.href = '/usersmanager';
+  }
+  if (e.target.matches('#submit-documents')) {
+    e.preventDefault();
+    const userId = userSession._id;
+    const formData = new FormData();
+    if (document_input_id?.files[0]) { formData.append('document_id', document_input_id.files[0]); }
+    if (document_input_address?.files[0]) { formData.append('document_address', document_input_address.files[0]); }
+    if (document_input_bank?.files[0]) { formData.append('document_bank', document_input_bank.files[0]); }
+    if (!formData.has('document_id') && !formData.has('document_address') && !formData.has('document_bank')) {
+      Swal.fire(
+        'Ups!',
+        'You must select at least one document.',
+        'error'
+      );
+    } else {
+      uploadDocuments(userId, formData);
+      submitDocuments.disabled = true;
+    }
   }
 }, false);
 
@@ -338,7 +360,7 @@ async function create_cart (id) {
         if (data) {
           const userId = userSession._id;
           const cartId = data.cartCreated._id;
-          const res = await udpate_user_cart(userId, cartId);
+          const res = await update_user_cart(userId, cartId);
           if (res.status === 201) {
             userSession.cart = cartId;
             socket = io();
@@ -388,7 +410,7 @@ async function update_cart (id) {
   }
 }
 
-async function udpate_user_cart (userId, cartId) {
+async function update_user_cart (userId, cartId) {
   try {
     const response = await fetch(`http://localhost:3000/api/users/${userId}/cart/${cartId}`, {
       method: 'put',
@@ -533,3 +555,46 @@ updateProduct?.addEventListener('click', async (e) => {
     }
   }
 });
+
+// upload documents via file input
+const uploadDocuments = async (userId, documents) => {
+  fetch(`http://localhost:3000/api/users/${userId}/documents`, {
+    method: 'POST',
+    body: documents
+  }).then(async (response) => {
+    const data = await response.json();
+    setTimeout(() => {
+      document.location.href = '/profile';
+    }, 2000);
+    const swalNoConfirmButton = Swal.mixin({
+      showConfirmButton: false
+    });
+    if (data.status === 200) {
+      swalNoConfirmButton.fire(
+        'Success!',
+        'Documents uploaded.',
+        'success'
+      );
+    } else if (data.status === 400) {
+      console.error(data.error);
+      swalNoConfirmButton.fire(
+        'Ups!',
+        'Something went wrong.',
+        'error'
+      );
+    } else if (data.status === 401) {
+      swalNoConfirmButton.fire(
+        'Ups!',
+        'You are not authorized to perform this action.',
+        'error'
+      );
+    } else {
+      swalNoConfirmButton.fire(
+        'Ups!',
+        'Something went wrong.',
+        'error'
+      );
+      throw new Error('Unexpected response');
+    }
+  });
+};
