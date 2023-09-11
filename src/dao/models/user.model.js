@@ -9,8 +9,19 @@ const userSchema = new mongoose.Schema({
   lastName: { type: String, required: true, max: 50 },
   age: { type: Number, required: true, max: 100 },
   cart: { type: mongoose.Schema.Types.ObjectId, ref: 'carts' },
-  role: { type: String, enum: ['user', 'premium', 'admin'], required: true, default: 'user' }
-});
+  role: { type: String, enum: ['user', 'premium', 'admin'], required: true, default: 'user' },
+  documents: {
+    type: [
+      {
+        fieldname: { type: String, required: true },
+        name: { type: String, required: true },
+        reference: { type: String, required: true }
+      }
+    ],
+    required: true
+  },
+  last_connection: { type: Date, default: null }
+}, { timestamps: true });
 
 userSchema.plugin(mongoosePaginate);
 const userModel = mongoose.model(userCollection, userSchema);

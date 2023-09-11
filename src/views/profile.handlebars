@@ -80,11 +80,54 @@
                 disabled>
             </div>
           </div>
+          <div class="form-group row mb-2">
+            <label for="role" class="col-sm-4 col-form-label">Account type:</label>
+            <div class="col-sm-8">
+              <input type="text" class="form-control" id="role" placeholder="Role" value={{user.role}} disabled>
+            </div>
+          </div>
         </div>
       </form>
     </div>
   </div>
 
+
+  {{#if isRegularUser}}
+  <div class="row m-auto justify-content-center">
+    <div class="col-sm-10 col-md-8 col-lg-6 d-flex justify-content-center">
+      <form class="col-10">
+        <div class="form-row">
+          <div class="alert alert-warning mb-2 mt-2" role="alert">
+            <p class="small m-0 text-center">Validate your account to upgrade to premium.</p>
+          </div>
+          <div class="alert alert-light mb-1" role="alert">
+            <p class="small text-center m-0 mb-3">Document(s) missing: <u>{{documents.requiredDocumentsMissing}}</u>.</p>
+            <form>
+              <div class="form-group">
+                {{#unless documents.userDocumentationStatus.document_id}}
+                <label for="document" class="label">Provide a valid identification document</label>
+                <input type="file" class="form-control" name="document_id" id="document_id" accept=".pdf,.doc,.docx">
+                {{/unless}}
+                {{#unless documents.userDocumentationStatus.document_address}}
+                <label for="document" class="label mt-3">Provide a valid proof of address</label>
+                <input type="file" class="form-control" name="document_address" id="document_address"
+                  accept=".pdf,.doc,.docx">
+                {{/unless}}
+                {{#unless documents.userDocumentationStatus.document_bank}}
+                <label for="document" class="label mt-3">Provide a bank account statement</label>
+                <input type="file" class="form-control" name="document_bank" id="document_bank"
+                  accept=".pdf,.doc,.docx">
+                {{/unless}}
+              </div>
+              <br>
+              <button class="btn btn-secondary" id="submit-documents">Upload documents</button>
+            </form>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  {{/if}}
 </div>
 
 <script src="/socket.io/socket.io.js"></script>

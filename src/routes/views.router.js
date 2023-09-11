@@ -55,8 +55,40 @@ viewsRouter.get('/reset-password/:token', handlePolicies(['PUBLIC']), async (req
 viewsRouter.get('/profile', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (req, res) => {
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
+
   const isAdmin = user?.role === 'admin';
-  const isPremium = user?.role === 'premium';
+  const isPremium = req.user?.role === 'premium';
+  const isRegularUser = req.user?.role === 'user';
+
+  // possible documents to be uploaded
+  const requiredDocuments = {
+    // eslint-disable-next-line quote-props
+    document_id: { name: 'ID' },
+    document_address: { name: 'Proof of address' },
+    document_bank: { name: 'Bank statement' }
+  };
+  // check which documents the user has uploaded
+  const userDocumentationStatus = Object.keys(requiredDocuments).map(doc => {
+    const userDocument = req.user?.documents.find(document => document.fieldname === doc);
+    // eslint-disable-next-line no-unneeded-ternary
+    return [doc, userDocument ? true : false];
+  });
+  // check which documents are missing and return a string with the missing documents
+  const missingDocuments = Object.entries(userDocumentationStatus).reduce((acc, curr) => {
+    if (!curr[1][1]) { acc.push(requiredDocuments[curr[1][0]].name); }
+    return acc;
+  }, []);
+  const requiredDocumentsMissing = missingDocuments.join(', ');
+  // documents object to be passed to the view
+  const documents = {
+    userDocumentationStatus: {
+      document_id: userDocumentationStatus[0][1],
+      document_address: userDocumentationStatus[1][1],
+      document_bank: userDocumentationStatus[2][1]
+    },
+    requiredDocumentsMissing
+  };
+
   user = !isAdmin ? req.user : user;
 
   if (user?.cart) {
@@ -67,9 +99,9 @@ viewsRouter.get('/profile', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async 
         return cartLength;
       })
       .catch(err => req.log.error(`[profile] failed to fetch cart: ${err}`));
-    res.render('profile', { user, isAdmin, isPremium, userCartLength });
+    res.render('profile', { user, isAdmin, isPremium, isRegularUser, documents, userCartLength });
   } else {
-    res.render('profile', { user, isAdmin, isPremium, userCartLength: 0 });
+    res.render('profile', { user, isAdmin, isPremium, isRegularUser, documents, userCartLength: 0 });
   }
 });
 
