@@ -85,6 +85,28 @@ const parseEmailData = async (type, data) => {
         }
       };
       break;
+    case 'product_removed':
+      subject = 'Product removed';
+      template = {
+        body: {
+          name: data.user.firstName,
+          intro: `Your product "${data.product.title}" was removed from the store.`,
+          outro: 'If you have any questions, please contact an administrator.',
+          signature: false
+        }
+      };
+      break;
+    case 'inactive_user':
+      subject = 'Account deleted';
+      template = {
+        body: {
+          name: data.user.firstName,
+          intro: 'Your account was deleted due to inactivity.',
+          outro: 'Sorry for the inconvenience.',
+          signature: false
+        }
+      };
+      break;
     default:
       subject = 'Test email';
       template = {};

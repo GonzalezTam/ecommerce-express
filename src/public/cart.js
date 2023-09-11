@@ -60,7 +60,7 @@ const submitOrder = async (order) => {
       if (data.status === 201) {
         const ticketCode = data.result.ticket.code;
         const warning = order.operations.notEnoughRequested.length;
-        document.location.href = `/purchase/${ticketCode}?warning=${warning}`;
+        document.location.href = warning > 0 ? `/purchase/${ticketCode}?warning=${warning}` : `/purchase/${ticketCode}`;
       } else {
         document.location.href = '/purchase/error';
       }

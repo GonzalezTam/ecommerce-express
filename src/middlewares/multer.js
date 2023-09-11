@@ -27,7 +27,6 @@ const configureMulter = (destinationPath) => {
     const upload = multer({ storage });
     return upload;
   } catch (error) {
-    console.log(error);
     log.error('[configureMulter] ' + error.message);
   }
 };
