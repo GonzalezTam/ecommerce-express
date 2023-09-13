@@ -88,8 +88,16 @@ const uploadDocuments = async (req, res) => {
   }
 };
 
-// TODO: implement this
-const deleteInactiveUsers = async (req, res) => { };
+const deleteInactiveUsers = async (req, res) => {
+  try {
+    const result = await usersService.deleteInactiveUsers();
+    req.log.info(`[users-deleteInactiveUsers] ${result.message}`);
+    return res.status(result.status).send(result);
+  } catch (error) {
+    req.log.error(`[users-deleteInactiveUsers] ${error.message}`);
+    return res.status(400).send({ status: 'error', message: error.message });
+  }
+};
 
 const usersController = {
   getAllUsers,

@@ -16,7 +16,7 @@ usersRouter.post('/:id/documents', uploadDocuments.fields([
   { name: 'document_bank', maxCount: 1 }
 ]), usersController.uploadDocuments);
 usersRouter.put('/premium/:id', usersController.updateUserPremium);
+usersRouter.delete('/', usersController.deleteInactiveUsers);
 usersRouter.delete('/:id', usersController.deleteUser);
-usersRouter.delete('/inactives', usersController.deleteInactiveUsers);
 
 export default usersRouter;

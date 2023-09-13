@@ -1,14 +1,15 @@
 /* eslint-disable camelcase */
 /* eslint-disable no-unused-vars */
-import { userDTO } from '../dto/user.dto.js';
+import { userDTO, userMinimalDTO } from '../dto/user.dto.js';
 import { documentsDto } from '../dto/documents.dto.js';
 import cartModel from '../dao/models/cart.model.js';
 import userModel from '../dao/models/user.model.js';
+import { emailSender } from '../utils/mailing/emailSender.js';
 
 const getAllUsers = async () => {
   try {
     const users = await userModel.find({});
-    const result = users.map((user) => userDTO(user));
+    const result = users.map((user) => userMinimalDTO(user));
     return { status: 200, result };
   } catch (error) {
     return { status: 404, message: error.message };
@@ -185,8 +186,32 @@ const getUserDocuments = async (userId) => {
   }
 };
 
-// TODO: implement this
-const deleteInactiveUsers = async () => { };
+const deleteInactiveUsers = async () => {
+  try {
+    // 172800000 = 48 hours in milliseconds
+    const deletedCount = [];
+    const findInactive = await userModel.find({ last_connection: { $lt: new Date(Date.now() - 172800000) } });
+    if (findInactive.length === 0) { return { status: 404, message: 'No inactive users found' }; }
+
+    // Send email to each inactive user to notify them that their account will be deleted
+    const promises = findInactive.map(async (user) => {
+      const data = {
+        user: {
+          firstName: user.firstName,
+          email: user.email
+        }
+      };
+      await userModel.findByIdAndDelete(user._id);
+      await emailSender('inactive_user', data);
+      deletedCount.push(user._id);
+    });
+    await Promise.all(promises);
+
+    return { status: 200, message: `${deletedCount.length} inactive user(s) deleted` };
+  } catch (error) {
+    return { status: 404, message: error };
+  }
+};
 
 export const usersService = {
   getAllUsers,

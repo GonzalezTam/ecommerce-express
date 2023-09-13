@@ -1,6 +1,8 @@
 import dotEnvConfig from '../config/env.config.js';
 import productModel from '../dao/models/product.model.js';
+import userModel from '../dao/models/user.model.js';
 import { cartsService } from '../services/carts.service.js';
+import { emailSender } from '../utils/mailing/emailSender.js';
 
 const { ENVIRONMENT } = dotEnvConfig;
 
@@ -31,7 +33,7 @@ const getAllProducts = async (req) => {
     }
 
     // if there is no category or status, the query will be empty and all products will be returned
-    const products = await productModel.paginate(query, { page: page || 1, limit: 10 });
+    const products = await productModel.paginate(query, { page: page || 1, limit: 8 });
 
     const loopedPages = [];
     for (let i = 0; i < products.totalPages; i++) {
@@ -337,6 +339,14 @@ const deleteProduct = async (req) => {
 
     // delete the product
     const deletedProduct = await productModel.deleteOne({ _id: id });
+
+    // send an email to the owner of the product to notify him that his product has been deleted
+    const productOwner = await userModel.findOne({ email: toDeleteProduct.owner }).lean().exec();
+    if (productOwner.role === 'premium') {
+      const data = { user: { email: toDeleteProduct.owner }, product: toDeleteProduct };
+      await emailSender('product_removed', data);
+    }
+
     const result = { deletedProduct: { ...deletedProduct, _id: id }, status: 200 };
     req.log.info('[products-deleteProduct] product deleted successfully');
     return result;

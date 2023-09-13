@@ -31,7 +31,6 @@ sendRecoveryLinkButton?.addEventListener('click', (e) => {
 });
 
 resetPasswordButton?.addEventListener('click', (e) => {
-  console.log('resetPasswordButton');
   resetPasswordButton.disabled = true;
   e.preventDefault();
   resetPassword();
@@ -164,7 +163,6 @@ async function resetPassword () {
   const password = document.getElementById('inputResetPassword').value;
   const password2 = document.getElementById('inputResetPassword2').value;
   const token = location.pathname.split('/')[2];
-  console.log(`password: ${password}, password2: ${password2}, token: ${token}`);
   const resetPasswordAlert = document.getElementById('reset-password-alert');
   const body = { password, password2, token };
   try {
