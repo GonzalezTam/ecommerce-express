@@ -13,7 +13,7 @@ const getCurrent = async (req) => {
     return result;
   }
   result = { user: {}, error: 'User not logged in', status: 401 };
-  req.log.warn('[session-getCurrent] there is no current user session');
+  // req.log.warn('[session-getCurrent] there is no current user session');
   return result;
 };
 

@@ -6,26 +6,33 @@ import dotEnvConfig from '../config/env.config.js';
 const { ADMIN_EMAIL, ADMIN_PASSWORD } = dotEnvConfig;
 
 export const handlePolicies = policies => (req, res, next) => {
-  // if PUBLIC policy is present and user is logged in, redirect to profile.
-  if (policies.includes('PUBLIC') && req.session.user) return res.redirect('/profile');
-  // if PUBLIC policy is present, allow access.
-  if (policies.includes('PUBLIC')) return next();
+  try {
+    // if ADMIN policy is present and user is admin, allow access.
+    if (policies.includes('ADMIN') && req.session.user?.role === 'admin') return next();
+    // if PUBLIC policy is present and user is logged in, redirect to profile.
+    if (policies.includes('PUBLIC') && req.user) return res.redirect('/profile');
+    // if PUBLIC policy is present, allow access.
+    if (policies.includes('PUBLIC')) return next();
 
-  // if user is logged in, check if user role is in policies.
-  if (req.session.user) {
-    if (policies.length > 0) {
-      if (!policies.includes(req.session.user.role.toUpperCase())) {
-        req.log.warn(`[handle-policies] user ${req.session.user.email} tried to access ${req.path}`);
-        return res.status(403).json({ status: 'error', error: 'You are not authorized' });
+    // if user is logged in, check if user role is in policies.
+    if (req.user) {
+      if (policies.length > 0) {
+        if (!policies.includes(req.user.role.toUpperCase())) {
+          req.log.warn(`[handle-policies] user ${req.user.email} tried to access ${req.path}`);
+          return res.status(403).json({ status: 'error', error: 'You are not authorized' });
+        }
       }
+      next();
+    } else {
+      // if user is not logged in, redirect to login page.
+      const path = req.path;
+      const failed = req.query.failed || true;
+      if (path === '/' && !req.query.failed) return res.redirect('/login');
+      return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
     }
-    next();
-  } else {
-    // if user is not logged in, redirect to login page.
-    const path = req.path;
-    const failed = req.query.failed || true;
-    if (path === '/' && !req.query.failed) return res.redirect('/login');
-    return res.redirect(`/login?failed=${failed}`); // `/login?failed=${failed}
+  } catch (error) {
+    req.log.error(`[handle-policies] ${error.message}`);
+    return res.status(500).json({ status: 'error', error: 'Something went wrong' });
   }
 };
 
@@ -48,13 +55,13 @@ export const registerValidations = async (req, res, next) => {
     if (!lastName) throw new Error('Last name is required.');
     if (!age || age > 100 || age < 18) throw new Error('Specify a valid age between 18 and 100.');
     if (!email || !emailRegex.test(email)) throw new Error('Provide a valid email.');
-    if (email === 'adminCoder@coder.com') throw new Error('Email not available.');
+    if (email === ADMIN_EMAIL) throw new Error(`Email ${ADMIN_EMAIL} is not available.`);
     if (!password) throw new Error('Password is required.');
     if (!password2) throw new Error('Password confirmation is required.');
     if (password !== password2) throw new Error('Passwords do not match.');
 
     const user = await userModel.findOne({ email });
-    if (user) throw new Error('Email not available.');
+    if (user) throw new Error(`Email ${email} is not available.`);
   } catch (error) {
     req.log.warn(`[register-validations] ${error}`);
     return res.status(400).send({ message: `${error}` });

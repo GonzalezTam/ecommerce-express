@@ -109,7 +109,7 @@ viewsRouter.get('/products', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
-  const isPremium = user?.role === 'premium';
+  const isPremium = req.user?.role === 'premium';
   user = !isAdmin ? req.user : user;
 
   const products = await productsService.getAllProducts(req);
@@ -132,7 +132,7 @@ viewsRouter.get('/productsmanager', handlePolicies(['PREMIUM', 'ADMIN']), async 
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
-  const isPremium = user?.role === 'premium';
+  const isPremium = req.user?.role === 'premium';
   user = !isAdmin ? req.user : user;
 
   const products = await productsService.getAllProductsManager(req);
@@ -197,7 +197,7 @@ viewsRouter.get('/chat', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (re
   // workaround to get user from session and use admin hardcoded user
   let user = req.session.user;
   const isAdmin = user?.role === 'admin';
-  const isPremium = user?.role === 'premium';
+  const isPremium = req.user?.role === 'premium';
   user = !isAdmin ? req.user : user;
 
   let result;

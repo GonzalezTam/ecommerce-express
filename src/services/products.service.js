@@ -176,7 +176,7 @@ const getProductsById = async (req) => {
 };
 
 const createProduct = async (req) => {
-  if (ENVIRONMENT !== 'test' && req.session.user.role === 'user') { return { error: 'You are not authorized to perform this action', status: 401 }; }
+  if (ENVIRONMENT !== 'test' && req.user?.role === 'user') { return { error: 'You are not authorized to perform this action', status: 401 }; }
   // In production, only admins and premium users can create products.
   //  For testing purposes the endpoint is not protected (products go to testing database)
 

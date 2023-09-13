@@ -396,10 +396,9 @@ async function update_cart (id) {
       socket.emit('cartUpdated', dataUpdatedCart.cart);
     } else if (response.status === 400) {
       const data = await response.json();
-      console.error(data.error);
       Swal.fire(
         'Ups!',
-        'Something went wrong.',
+        `${data.error}`,
         'error'
       );
     } else {
