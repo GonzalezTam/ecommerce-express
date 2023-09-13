@@ -1,11 +1,58 @@
 /* eslint-disable no-undef */
 const checkoutButton = document.getElementById('order-checkout-button');
+const removeFromCartButton = document.getElementById('remove-from-cart-button');
 const cartId = document.getElementById('my-cart').getAttribute('data-cart-id');
+
+document.addEventListener('click', function (e) {
+  if (e.target && e.target.id === 'remove-from-cart-button') {
+    const productId = e.target.getAttribute('data-product-id');
+    swal.fire({
+      title: 'Are you sure?',
+      text: 'You are about to remove this product from your cart',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, remove it!',
+      cancelButtonText: 'No, keep it'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        removeProductFromCart(cartId, productId);
+      }
+    });
+  }
+}, false);
 
 checkoutButton.addEventListener('click', function (e) {
   if (cartId) checkProductAvailability(cartId);
   checkoutButton.disabled = true;
 }, false);
+
+const removeProductFromCart = async (cartId, productId) => {
+  removeFromCartButton.disabled = true;
+  fetch(`http://localhost:3000/api/carts/${cartId}/products/${productId}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+    .then(res => res.json())
+    .then(data => {
+      if (data.status === 200) {
+        Swal.fire({
+          icon: 'success',
+          showConfirmButton: false
+        });
+        document.location.reload();
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Oops...',
+          text: data.error
+        });
+        removeFromCartButton.disabled = false;
+      }
+    })
+    .catch(err => console.error(err));
+};
 
 const checkProductAvailability = async (cartId) => {
   fetch(`http://localhost:3000/api/products/purchase/${cartId}`, {

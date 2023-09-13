@@ -52,7 +52,7 @@
     <!-- Admin view -->
     {{#if isAdmin}}
     {{#each products.payload}}
-    <div class="card m-2 p-0" style="width: 16rem;">
+    <div class="card m-2 p-0" style="width: 18rem;">
       <img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
       <div class="card-body">
         <h5 class="card-title small">{{this.title}}</h5>
@@ -76,7 +76,7 @@
     <!-- User view -->
     {{#unless isAdmin}}
     {{#each products.payload}}
-    <div class="card m-2 p-0" style="width: 16rem;">
+    <div class="card m-2 p-0" style="width: 18rem;">
       <img src="http://via.placeholder.com/640x360" class="card-img-top" alt="...">
       <div class="card-body">
         <h5 class="card-title small">{{this.title}}</h5>

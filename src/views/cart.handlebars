@@ -18,7 +18,8 @@
       <!-- Admin does not have access to cart -->
       {{#unless isAdmin}}
       <li class="nav-item active">
-        <a class="nav-link" id="my-cart" href="/{{cid}}/purchase" data-cart-id="{{cart._id}}">🛒 ({{userCartLength}})</a>
+        <a class="nav-link" id="my-cart" href="/{{cid}}/purchase" data-cart-id="{{cart._id}}">🛒
+          ({{userCartLength}})</a>
       </li>
       {{/unless}}
     </ul>
@@ -47,26 +48,31 @@
         <tr>
           <td></td>
           <td><strong>Product</strong></td>
-          <td><strong>x</strong></td>
           <td><strong>Stock</strong></td>
+          <td><strong>x</strong></td>
           <td><strong>Price</strong></td>
           <td><strong>Subtotal</strong></td>
+          <td style="width: 5em;"></td>
         </tr>
         {{#if cart.products.length}}
         {{#each cart.products }}
         <tr class="{{#if this.notEnoughStockWarning}}text-secondary{{/if}}{{#unless this.stock}}text-danger{{/unless}}">
           <td class="text-center" style="width: 1em;">{{#if this.notEnoughStockWarning}}⚠{{/if}}</td>
           <td>{{this.title}}</td>
-          <td>{{this.quantity}}</td>
           <td>{{this.stock}}</td>
+          <td>{{this.quantity}}</td>
           <td>{{this.price}}</td>
           <td>{{this.subtotal}}</td>
+          <td>
+            <button class="btn btn-sm p-0 d-flex justify-content-center" style="margin-left: 1em; color: white;"
+              data-product-id="{{this._id}}" id="remove-from-cart-button">❌</button>
+          </td>
         </tr>
         {{/each}}
         <!-- If no products -->
         {{else}}
         <tr>
-          <td colspan="8" class="text-center">No products available</td>
+          <td colspan="8" class="text-center">No products in cart</td>
         </tr>
         {{/if}}
       </table>
@@ -74,8 +80,9 @@
       {{#if cart.outOfStockFlag}}
       <div class="alert alert-warning" role="alert">
         <p class="m-auto">It seems that some products are out of stock or have insufficient stock. Please check the
-          table above. <br> If you decide to continue, the products with insufficient stock won't be added to the order.</p>
-        </div>
+          table above. <br> If you decide to continue, the products with insufficient stock won't be added to the order.
+        </p>
+      </div>
       {{/if}}
     </div>
 
@@ -97,7 +104,8 @@
           </tr>
         </table>
         <div class="col-12 d-inline-grid">
-          <button id="order-checkout-button" class="btn btn-success btn-sm btn-block {{#unless userCartLength}}disabled{{/unless}}">Checkout</button>
+          <button id="order-checkout-button"
+            class="btn btn-success btn-sm btn-block {{#unless userCartLength}}disabled{{/unless}}">Checkout</button>
         </div>
       </div>
     </div>
