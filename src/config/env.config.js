@@ -7,6 +7,7 @@ const { mode } = commander.opts();
 // Load env vars
 dotenv.config();
 
+const DOMAIN = process.env.DOMAIN;
 const ENVIRONMENT = mode;
 const PORT = process.env.PORT || 3000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 3001;
@@ -17,7 +18,7 @@ const SECRET = process.env.SECRET;
 
 const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
-const GITHUB_CALLBACK_URL = process.env.GITHUB_CALLBACK_URL;
+const GITHUB_CALLBACK_URL = DOMAIN + process.env.GITHUB_CALLBACK_URL;
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL;
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
@@ -26,6 +27,7 @@ const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_PASSWORD = process.env.GMAIL_PASSWORD;
 
 const dotEnvConfig = {
+  DOMAIN,
   ENVIRONMENT,
   PORT,
   SOCKET_PORT,

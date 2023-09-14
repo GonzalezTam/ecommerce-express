@@ -56,7 +56,7 @@ async function register () {
   };
 
   try {
-    const response = await fetch('http://localhost:3000/api/session/register', {
+    const response = await fetch('/api/session/register', {
       method: 'post',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
@@ -87,7 +87,7 @@ async function login () {
     password
   };
   try {
-    const response = await fetch('http://localhost:3000/api/session/login', {
+    const response = await fetch('/api/session/login', {
       method: 'post',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
@@ -110,7 +110,7 @@ async function login () {
 
 async function logout () {
   try {
-    const response = await fetch('http://localhost:3000/api/session/logout', {
+    const response = await fetch('/api/session/logout', {
       method: 'get',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -132,7 +132,7 @@ async function sendResetLink () {
   const sendRecoveryLinkAlert = document.getElementById('send-recovery-link-alert');
   const body = { email };
   try {
-    const response = await fetch('http://localhost:3000/api/session/forgot-password', {
+    const response = await fetch('/api/session/forgot-password', {
       method: 'post',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
@@ -166,7 +166,7 @@ async function resetPassword () {
   const resetPasswordAlert = document.getElementById('reset-password-alert');
   const body = { password, password2, token };
   try {
-    const response = await fetch('http://localhost:3000/api/session/reset-password', {
+    const response = await fetch('/api/session/reset-password', {
       method: 'post',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
