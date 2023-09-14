@@ -7,7 +7,7 @@ import { usersService } from '../services/users.service.js';
 import { sessionsService } from '../services/session.service.js';
 const viewsRouter = Router();
 
-const { PORT } = dotEnvConfig;
+const { DOMAIN } = dotEnvConfig;
 
 // TODO: refactor this  file.
 
@@ -92,7 +92,7 @@ viewsRouter.get('/profile', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async 
   user = !isAdmin ? req.user : user;
 
   if (user?.cart) {
-    const userCartLength = await fetch(`http://localhost:${PORT}/api/carts/${user?.cart}`)
+    const userCartLength = await fetch(`${DOMAIN}/api/carts/${user?.cart}`)
       .then(res => res.json())
       .then(data => {
         const cartLength = data.cart?.products?.reduce((acc, curr) => acc + curr.quantity, 0) || 0;
@@ -114,7 +114,7 @@ viewsRouter.get('/products', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async
 
   const products = await productsService.getAllProducts(req);
   if (user?.cart) {
-    const userCartLength = await fetch(`http://localhost:${PORT}/api/carts/${user?.cart}`)
+    const userCartLength = await fetch(`${DOMAIN}/api/carts/${user?.cart}`)
       .then(res => res.json())
       .then(data => {
         const cartLength = data.cart?.products?.reduce((acc, curr) => acc + curr.quantity, 0) || 0;
@@ -137,7 +137,7 @@ viewsRouter.get('/productsmanager', handlePolicies(['PREMIUM', 'ADMIN']), async 
 
   const products = await productsService.getAllProductsManager(req);
   if (user?.cart) {
-    const userCartLength = await fetch(`http://localhost:${PORT}/api/carts/${user.cart}`)
+    const userCartLength = await fetch(`${DOMAIN}/api/carts/${user.cart}`)
       .then(res => res.json())
       .then(data => {
         const cartLength = data.cart?.products?.reduce((acc, curr) => acc + curr.quantity, 0) || 0;
@@ -179,7 +179,7 @@ viewsRouter.get('/purchase/:ticketCode', handlePolicies(['USER', 'PREMIUM']), as
   const hasWarning = req.query.warning;
   try {
     if (ticketCode === 'error') res.render('purchase_failed');
-    await fetch(`http://localhost:${PORT}/api/orders/ticket/${ticketCode}`)
+    await fetch(`${DOMAIN}/api/orders/ticket/${ticketCode}`)
       .then(res => res.json())
       .then(data => {
         const order = data.order;
@@ -201,14 +201,14 @@ viewsRouter.get('/chat', handlePolicies(['USER', 'PREMIUM', 'ADMIN']), async (re
   user = !isAdmin ? req.user : user;
 
   let result;
-  await fetch(`http://localhost:${PORT}/api/chat`)
+  await fetch(`${DOMAIN}/api/chat`)
     .then(res => res.json())
     .then(data => {
       result = data.messages;
     })
     .catch(err => req.log.error(`[chat] failed to fetch messages: ${err}`));
   if (user?.cart) {
-    const userCartLength = await fetch(`http://localhost:${PORT}/api/carts/${user?.cart}`)
+    const userCartLength = await fetch(`${DOMAIN}/api/carts/${user?.cart}`)
       .then(res => res.json())
       .then(data => {
         const cartLength = data.cart?.products?.reduce((acc, curr) => acc + curr.quantity, 0) || 0;
