@@ -7,6 +7,7 @@ const { mode } = commander.opts();
 // Load env vars
 dotenv.config();
 
+const DOMAIN = process.env.DOMAIN;
 const ENVIRONMENT = mode;
 const PORT = process.env.PORT || 3000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 3001;
@@ -26,6 +27,7 @@ const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_PASSWORD = process.env.GMAIL_PASSWORD;
 
 const dotEnvConfig = {
+  DOMAIN,
   ENVIRONMENT,
   PORT,
   SOCKET_PORT,

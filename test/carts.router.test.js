@@ -2,8 +2,11 @@
 import supertest from 'supertest';
 import { expect } from 'chai';
 import { faker } from '@faker-js/faker';
+import dotenv from 'dotenv';
 
-const requester = supertest('http://localhost:3000');
+dotenv.config();
+const DOMAIN = process.env.DOMAIN;
+const requester = supertest(DOMAIN);
 
 const product = {
   title: faker.commerce.productName(),

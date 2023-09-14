@@ -14,7 +14,7 @@ document.onreadystatechange = async () => {
       : '/products';
     const query = location.search;
     if (products) {
-      await fetch(`http://localhost:3000/api${products}${query}`)
+      await fetch(`/api${products}${query}`)
         .then(res => res.json())
         .then(data => {
           productsArray = data.products.payload;
@@ -24,7 +24,7 @@ document.onreadystatechange = async () => {
   }
 
   if (location.pathname === '/usersmanager') {
-    await fetch('http://localhost:3000/api/users/manager')
+    await fetch('/api/users/manager')
       .then(res => res.json())
       .then(data => {
         usersArray = data.users.payload;
@@ -32,7 +32,7 @@ document.onreadystatechange = async () => {
       .catch(err => console.log(err));
   }
 
-  await fetch('http://localhost:3000/api/session/current')
+  await fetch('/api/session/current')
     .then(res => res.json())
     .then(data => {
       if (data.status === 200) userSession = data.user;
@@ -161,7 +161,7 @@ async function delete_product (id) {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        fetch(`http://localhost:3000/api/products/${id}`, {
+        fetch(`/api/products/${id}`, {
           method: 'delete'
         }).then(async (response) => {
           const data = await response.json();
@@ -246,7 +246,7 @@ async function edit_user (id) {
     const role = document.getElementById('role').value;
     if (result.isConfirmed) {
       try {
-        fetch(`http://localhost:3000/api/users/${id}`, {
+        fetch(`/api/users/${id}`, {
           method: 'put',
           body: JSON.stringify({ role }),
           headers: { 'Content-Type': 'application/json' }
@@ -305,7 +305,7 @@ async function delete_user (id) {
   }).then(async (result) => {
     if (result.isConfirmed) {
       try {
-        fetch(`http://localhost:3000/api/users/${id}`, {
+        fetch(`/api/users/${id}`, {
           method: 'delete'
         }).then(async (response) => {
           const data = await response.json();
@@ -350,7 +350,7 @@ async function create_cart (id) {
         }
       ]
     };
-    await fetch('http://localhost:3000/api/carts', {
+    await fetch('/api/carts', {
       method: 'post',
       body: JSON.stringify(body),
       headers: { 'Content-Type': 'application/json' }
@@ -385,12 +385,12 @@ async function update_cart (id) {
   const cartId = userSession.cart;
   const productId = id;
   try {
-    const response = await fetch(`http://localhost:3000/api/carts/${cartId}/products/${productId}`, {
+    const response = await fetch(`/api/carts/${cartId}/products/${productId}`, {
       method: 'post',
       headers: { 'Content-Type': 'application/json' }
     });
     if (response.status === 200) {
-      const fetchUpdatedCart = await fetch(`http://localhost:3000/api/carts/${cartId}`);
+      const fetchUpdatedCart = await fetch(`/api/carts/${cartId}`);
       const dataUpdatedCart = await fetchUpdatedCart.json();
       socket = io();
       socket.emit('cartUpdated', dataUpdatedCart.cart);
@@ -411,7 +411,7 @@ async function update_cart (id) {
 
 async function update_user_cart (userId, cartId) {
   try {
-    const response = await fetch(`http://localhost:3000/api/users/${userId}/cart/${cartId}`, {
+    const response = await fetch(`/api/users/${userId}/cart/${cartId}`, {
       method: 'put',
       headers: { 'Content-Type': 'application/json' }
     });
@@ -447,7 +447,7 @@ submitProduct?.addEventListener('click', async (e) => {
         stock: parseInt(stock.value),
         code: code.value
       };
-      fetch('http://localhost:3000/api/products', {
+      fetch('/api/products', {
         method: 'post',
         body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' }
@@ -508,7 +508,7 @@ updateProduct?.addEventListener('click', async (e) => {
         code: code.value
       };
       const id = updateProduct.dataset.id;
-      fetch(`http://localhost:3000/api/products/${id}`, {
+      fetch(`/api/products/${id}`, {
         method: 'put',
         body: JSON.stringify(body),
         headers: { 'Content-Type': 'application/json' }
@@ -557,7 +557,7 @@ updateProduct?.addEventListener('click', async (e) => {
 
 // upload documents via file input
 const uploadDocuments = async (userId, documents) => {
-  fetch(`http://localhost:3000/api/users/${userId}/documents`, {
+  fetch(`/api/users/${userId}/documents`, {
     method: 'POST',
     body: documents
   }).then(async (response) => {

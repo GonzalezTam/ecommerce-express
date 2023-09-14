@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer';
 import Mailgen from 'mailgen';
 import dotEnvConfig from '../../config/env.config.js';
 
-const { GMAIL_USER, GMAIL_PASSWORD } = dotEnvConfig;
+const { DOMAIN, GMAIL_USER, GMAIL_PASSWORD } = dotEnvConfig;
 
 const config = {
   service: 'gmail',
@@ -14,7 +14,7 @@ const MailGenerator = new Mailgen({
   theme: 'default',
   product: {
     name: 'node e-commerce',
-    link: 'http://localhost:3000/'
+    link: `${DOMAIN}`
   }
 });
 
@@ -35,7 +35,7 @@ const parseEmailData = async (type, data) => {
             button: {
               color: '#33b5e5',
               text: 'Reset your password',
-              link: `http://localhost:3000/reset-password/${data.token}`
+              link: `/reset-password/${data.token}`
             }
           },
           outro: 'If you did not request a password reset, no further action is required on your part.',

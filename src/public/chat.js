@@ -7,7 +7,7 @@ const chatBox = document.getElementById('chatBox');
 const history = document.getElementById('history');
 
 const fetchHistory = async () => {
-  await fetch('http://localhost:3000/api/chat')
+  await fetch('/api/chat')
     .then(res => res.json())
     .then(data => {
       messagesArray = data.messages;
@@ -40,7 +40,7 @@ chatBox.addEventListener('keyup', async (e) => {
           message: chatBox.value,
           date: new Date()
         };
-        const response = await fetch('http://localhost:3000/api/chat', {
+        const response = await fetch('/api/chat', {
           method: 'post',
           body: JSON.stringify(body),
           headers: { 'Content-Type': 'application/json' }
