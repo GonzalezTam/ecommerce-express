@@ -333,7 +333,7 @@ const deleteProduct = async (req) => {
     // For testing purposes the endpoint is not protected (products go to testing database)
     // if the user is not admin, he can only delete his own products
     // check if the user is authorized to delete the product
-    const userDeleting = ENVIRONMENT !== 'test' ? (req.session.user.role === 'admin' ? 'admin' : req.user.email) : 'admin'; // if ENVIRONMENT is test, the user is 'admin
+    const userDeleting = ENVIRONMENT !== 'test' ? (req.session.user?.role === 'admin' ? 'admin' : req.user.email) : 'admin'; // if ENVIRONMENT is test, the user is 'admin
     const toDeleteProduct = await productModel.findOne({ _id: id }).lean().exec();
     if (ENVIRONMENT !== 'test' && (userDeleting !== 'admin' && userDeleting !== toDeleteProduct.owner)) { return { error: 'You are not authorized to perform this action', status: 401 }; }
 
@@ -341,8 +341,8 @@ const deleteProduct = async (req) => {
     const deletedProduct = await productModel.deleteOne({ _id: id });
 
     // send an email to the owner of the product to notify him that his product has been deleted
-    const productOwner = await userModel.findOne({ email: toDeleteProduct.owner }).lean().exec();
-    if (productOwner.role === 'premium') {
+    const productOwner = await userModel.findOne({ email: toDeleteProduct?.owner }).lean().exec();
+    if (productOwner?.role === 'premium') {
       const data = { user: { email: toDeleteProduct.owner }, product: toDeleteProduct };
       await emailSender('product_removed', data);
     }

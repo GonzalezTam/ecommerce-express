@@ -28,7 +28,7 @@ checkoutButton.addEventListener('click', function (e) {
 
 const removeProductFromCart = async (cartId, productId) => {
   removeFromCartButton.disabled = true;
-  fetch(`http://localhost:3000/api/carts/${cartId}/products/${productId}`, {
+  fetch(`/api/carts/${cartId}/products/${productId}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json'
@@ -55,7 +55,7 @@ const removeProductFromCart = async (cartId, productId) => {
 };
 
 const checkProductAvailability = async (cartId) => {
-  fetch(`http://localhost:3000/api/products/purchase/${cartId}`, {
+  fetch(`/api/products/purchase/${cartId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json'
@@ -95,7 +95,7 @@ const checkProductAvailability = async (cartId) => {
 };
 
 const submitOrder = async (order) => {
-  fetch('http://localhost:3000/api/orders', {
+  fetch('/api/orders', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
