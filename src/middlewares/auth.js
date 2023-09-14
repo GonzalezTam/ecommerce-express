@@ -39,7 +39,7 @@ export const handlePolicies = policies => (req, res, next) => {
 // if user is not the owner of the cart, respond with 401.
 export const cartOwnership = async (req, res, next) => {
   const cartId = req.params.cid;
-  if (req.user.cart === cartId) return next();
+  if (req.user.cart.toString() === cartId) return next();
   else {
     req.log.warn(`[cart-ownership] user ${req.user._id} tried to access cart ${cartId}`);
     res.status(401).send({ message: 'Unauthorized' });
