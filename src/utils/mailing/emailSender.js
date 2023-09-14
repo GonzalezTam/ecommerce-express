@@ -35,7 +35,7 @@ const parseEmailData = async (type, data) => {
             button: {
               color: '#33b5e5',
               text: 'Reset your password',
-              link: `/reset-password/${data.token}`
+              link: `${DOMAIN}/reset-password/${data.token}`
             }
           },
           outro: 'If you did not request a password reset, no further action is required on your part.',
