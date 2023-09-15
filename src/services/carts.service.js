@@ -110,7 +110,7 @@ const createCart = async (req) => {
 };
 
 const addProductToCart = async (req) => {
-  const user = req.session.user;
+  const user = req.user;
   const cartId = req.params.cid;
   const productId = req.params.pid;
   const quantity = 0;
@@ -120,7 +120,7 @@ const addProductToCart = async (req) => {
 
   try {
     const product = await productModel.findOne({ _id: productId }).lean().exec();
-    if ((ENVIRONMENT !== 'test') && user.email === product?.owner) { return { status: 400, error: 'You cannot add your own product to your cart' }; }
+    if ((ENVIRONMENT !== 'test') && user?.email === product?.owner) { return { status: 400, error: 'You cannot add your own product to your cart' }; }
 
     const cart = await cartModel.findOne({ _id: cartId }).lean().exec();
     const productInCart = Object.values(cart.products).some(product => product.productId === productId);
